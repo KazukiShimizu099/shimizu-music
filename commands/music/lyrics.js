@@ -104,7 +104,7 @@ module.exports = {
       }
 
       function getCurrentLine(position) {
-        const posSeconds = (position / 1000) + 1.5;
+        const posSeconds = position / 1000 + 2.0;
         let current = 0;
         for (let i = 0; i < lines.length; i++) {
           if (lines[i].time <= posSeconds) current = i;
@@ -113,14 +113,16 @@ module.exports = {
       }
 
       function buildSyncedEmbed(currentIndex) {
-        const start = Math.max(0, currentIndex - 2);
-        const end = Math.min(lines.length, currentIndex + 5);
+        const start = Math.max(0, currentIndex - 3);
+        const end = Math.min(lines.length, currentIndex + 4);
         const display = lines
           .slice(start, end)
           .map((line, i) => {
             const actualIndex = start + i;
             if (actualIndex === currentIndex) {
               return `### ▶ ${line.text || "♪"}`;
+            } else if (actualIndex === currentIndex - 1) {
+              return `> ${line.text || "♪"}`;
             }
             return `${line.text || "♪"}`;
           })
@@ -161,7 +163,7 @@ module.exports = {
         } catch (e) {
           clearInterval(interval);
         }
-      }, 1500);
+      }, 1000);
 
       setTimeout(() => clearInterval(interval), 600000);
       return;

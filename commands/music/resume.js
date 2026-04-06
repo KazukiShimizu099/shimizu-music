@@ -3,12 +3,12 @@ const { SlashCommandBuilder } = require("discord.js");
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("resume")
-    .setDescription("Shimizu Music - Resume the paused song"),
+    .setDescription("Shimizu Music - Resume paused song"),
 
   async execute(interaction, client) {
-    const guildQueue = client.queue.get(interaction.guildId);
+    const player = client.kazagumo.players.get(interaction.guildId);
 
-    if (!guildQueue)
+    if (!player)
       return interaction.reply({
         content: "❌ No song is currently playing!",
         ephemeral: true,
@@ -18,16 +18,22 @@ module.exports = {
         content: "❌ Please join a voice channel first!",
         ephemeral: true,
       });
-    if (!guildQueue.player.paused)
+    if (!player.paused)
       return interaction.reply({
-        content: "❌ The song is already playing!",
+        content: "❌ Song is already playing!",
         ephemeral: true,
       });
 
-    guildQueue.player.setPaused(false);
-    await interaction.reply({
-      content: "▶️ The song has been resumed!",
-      ephemeral: false,
-    });
+    await player.pause(false);
+
+    try {
+      if (interaction.deferred) {
+        await interaction.editReply({ content: "▶️ Song resumed!" });
+      } else {
+        await interaction.reply({ content: "▶️ Song resumed!" });
+      }
+    } catch (e) {
+      interaction.channel.send("▶️ Song resumed!");
+    }
   },
 };
