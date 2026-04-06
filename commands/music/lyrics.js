@@ -104,7 +104,7 @@ module.exports = {
       }
 
       function getCurrentLine(position) {
-        const posSeconds = position / 1000;
+        const posSeconds = (position / 1000) + 1.5;
         let current = 0;
         for (let i = 0; i < lines.length; i++) {
           if (lines[i].time <= posSeconds) current = i;
@@ -161,7 +161,7 @@ module.exports = {
         } catch (e) {
           clearInterval(interval);
         }
-      }, 3000);
+      }, 1500);
 
       setTimeout(() => clearInterval(interval), 600000);
       return;
