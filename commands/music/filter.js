@@ -15,12 +15,12 @@ module.exports = {
             value: "bassboost",
           },
           {
-            name: "🌙 Nightcore(Speed UP)Your Music Using Kazuki AI",
+            name: "🌙 Nightcore (Speed Up) Your Music Using Kazuki AI",
             value: "nightcore",
           },
           { name: "🎵 8D Audio Your Music Using Kazuki AI", value: "eightd" },
           {
-            name: "🌊 Vaporwave(Slowed)Your Music Using Kazuki AI",
+            name: "🌊 Vaporwave (Slowed) Your Music Using Kazuki AI",
             value: "vaporwave",
           },
           { name: "❌ Remove Filter", value: "none" },
@@ -39,7 +39,7 @@ module.exports = {
     if (!filterType) {
       return interaction.reply({
         content:
-          "❌ Filter type daalo!\nOptions: `bassboost`, `nightcore`, `8D`, `vaporwave`, `none`",
+          "❌ Please provide a filter type!\nOptions: `bassboost`, `nightcore`, `8D`, `vaporwave`, `none`",
         ephemeral: true,
       });
     }
@@ -86,9 +86,9 @@ module.exports = {
 
     const filterNames = {
       bassboost: "🎸 Bass Boost Your Music Using Kazuki AI",
-      nightcore: "🌙 Nightcore(Speed UP)Your Music Using Kazuki AI",
+      nightcore: "🌙 Nightcore (Speed Up) Your Music Using Kazuki AI",
       eightd: "🎵 8D Audio Your Music Using Kazuki AI",
-      vaporwave: "🌊 Vaporwave(Slowed)Your Music Using Kazuki AI",
+      vaporwave: "🌊 Vaporwave (Slowed) Your Music Using Kazuki AI",
       none: "❌ Filter Removed",
     };
 
@@ -102,7 +102,7 @@ module.exports = {
       console.error("Filter error:", e);
       await interaction.reply({
         content:
-          "❌ Filter apply karne mein error! Node filters support nahi karta.",
+          "❌ An error occurred while applying the filter! The node may not support filters.",
         ephemeral: true,
       });
     }

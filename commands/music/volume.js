@@ -7,7 +7,7 @@ module.exports = {
     .addIntegerOption((opt) =>
       opt
         .setName("amount")
-        .setDescription("Volume 1-100")
+        .setDescription("Volume between 1-100")
         .setRequired(true)
         .setMinValue(1)
         .setMaxValue(100),
@@ -24,7 +24,7 @@ module.exports = {
 
     if (!volume || isNaN(volume) || volume < 1 || volume > 100) {
       return interaction.reply({
-        content: "❌ Valid volume daalo (1-100)\nExample: `.v 80`",
+        content: "❌ Please provide a valid volume (1-100)\nExample: `.v 80`",
         ephemeral: true,
       });
     }
