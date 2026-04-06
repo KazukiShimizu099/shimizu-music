@@ -16,7 +16,7 @@ module.exports = {
     }
 
     const current = player.queue.current;
-    const tracks = player.queue.tracks;
+    const tracks = player.queue.tracks || [];
 
     if (!current) {
       return interaction.reply({
@@ -29,9 +29,9 @@ module.exports = {
       tracks.length > 0
         ? tracks
             .slice(0, 10)
-            .map((t, i) => `**${i + 1}.** [${t.title}](${t.uri}) - ${t.author}`)
+            .map((t, i) => `**${i + 1}.** ${t.title} - ${t.author}`)
             .join("\n")
-        : "No songs in queue";
+        : "*No songs in queue*";
 
     const embed = new EmbedBuilder()
       .setColor("#FF6B9D")
@@ -42,7 +42,7 @@ module.exports = {
       .setDescription(
         [
           `**🎵 Now Playing:**`,
-          `[${current.title}](${current.uri}) - ${current.author}`,
+          `${current.title} - ${current.author}`,
           ``,
           `**📋 Up Next:**`,
           queueList,
