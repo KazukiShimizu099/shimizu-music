@@ -182,7 +182,7 @@ kazagumo.on("playerStart", (player, track) => {
         } catch (e) {
           clearInterval(interval);
         }
-      }, 2000);
+      }, 1000);
 
       setTimeout(() => clearInterval(interval), 600000);
     })
