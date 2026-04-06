@@ -34,12 +34,10 @@ const nodes = [
     secure: true,
   },
 ];
-
-kazagumo.shoukaku.on('error', (name, error) => {
-  console.error(`Lavalink Node Error (${name}):`, error.message);
-});
+const kazagumo = new Kazagumo(
   {
     defaultSearchEngine: "youtube",
+
     send: (guildId, payload) => {
       const guild = client.guilds.cache.get(guildId);
       if (guild) guild.shard.send(payload);
@@ -50,6 +48,9 @@ kazagumo.shoukaku.on('error', (name, error) => {
 );
 
 client.kazagumo = kazagumo;
+kazagumo.shoukaku.on("error", (name, error) => {
+  console.error(`Lavalink Node Error (${name}):`, error.message);
+});
 client.commands = new Collection();
 
 kazagumo.on("playerStart", (player, track) => {
