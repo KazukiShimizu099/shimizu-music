@@ -63,76 +63,12 @@ module.exports = {
 
     if (!player.playing && !player.paused) await player.play();
 
-    const track = tracks[0];
-
-    const youtubeThumbnail =
-      track.uri && track.uri.includes("youtube")
-        ? `https://img.youtube.com/vi/${track.uri.split("v=")[1]?.split("&")[0]}/maxresdefault.jpg`
-        : track.thumbnail || null;
-
-    // Animated GIF background - anime music player theme
-    const animatedBg = "https://cdn.pfps.gg/banners/3752-anime.gif";
-
-    // Progress bar (static - Discord limitation)
-    const progressBar = "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬";
-    const duration = track.length ? msToTime(track.length) : "LIVE";
-
-    const embed = new EmbedBuilder()
-      .setColor("#FF6B9D")
-      .setAuthor({
-        name: "✨ Shimizu Music — Now Playing",
-        iconURL: client.user.displayAvatarURL(),
-      })
-      .setDescription(
-        [
-          `## 🎵 ${track.title}`,
-          ``,
-          `**🎤 Artist:** ${track.author || "Unknown"}`,
-          `**⏱️ Duration:** \`${duration}\``,
-          `**📋 Queue:** \`${player.queue.size} songs remaining\``,
-          ``,
-          `\`🔴\` ${progressBar} \`${duration}\``,
-          ``,
-          `> 👤 Requested by ${interaction.member.toString()}`,
-        ].join("\n"),
-      )
-      .setImage(animatedBg)
-      .setThumbnail(youtubeThumbnail)
-      .setFooter({
-        text: "꒰ Shimizu Music 🌸 ꒱ • Playing now",
-        iconURL: client.user.displayAvatarURL(),
-      })
-      .setTimestamp();
-
-    const row1 = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId("pause_resume")
-        .setLabel("⏸ Pause")
-        .setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder()
-        .setCustomId("skip")
-        .setLabel("⏭ Skip")
-        .setStyle(ButtonStyle.Primary),
-      new ButtonBuilder()
-        .setCustomId("stop")
-        .setLabel("⏹ Stop")
-        .setStyle(ButtonStyle.Danger),
-      new ButtonBuilder()
-        .setCustomId("loop")
-        .setLabel("🔁 Loop")
-        .setStyle(ButtonStyle.Success),
-      new ButtonBuilder()
-        .setCustomId("shuffle")
-        .setLabel("🔀 Shuffle")
-        .setStyle(ButtonStyle.Secondary),
-    );
-
-    await interaction.editReply({ embeds: [embed], components: [row1] });
+    if (tracks.length > 1) {
+      await interaction.editReply(
+        `✅ Added **${tracks.length} songs** from playlist to queue!`,
+      );
+    } else {
+      await interaction.editReply(`✅ Added to queue: **${tracks[0].title}**`);
+    }
   },
 };
-
-function msToTime(ms) {
-  const minutes = Math.floor(ms / 60000);
-  const seconds = ((ms % 60000) / 1000).toFixed(0);
-  return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-}
