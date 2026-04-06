@@ -5,6 +5,10 @@ const fs = require("fs");
 const path = require("path");
 require("dotenv").config();
 
+const MAINTENANCE_MODE = false;
+const MAINTENANCE_MESSAGE =
+  "🔧 Shimizu Music is currently under maintenance. Please wait a while and try again!";
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -34,10 +38,10 @@ const nodes = [
     secure: true,
   },
 ];
+
 const kazagumo = new Kazagumo(
   {
     defaultSearchEngine: "youtube",
-
     send: (guildId, payload) => {
       const guild = client.guilds.cache.get(guildId);
       if (guild) guild.shard.send(payload);
@@ -48,18 +52,26 @@ const kazagumo = new Kazagumo(
 );
 
 client.kazagumo = kazagumo;
+client.commands = new Collection();
+
 kazagumo.shoukaku.on("error", (name, error) => {
   console.error(`Lavalink Node Error (${name}):`, error.message);
 });
-client.commands = new Collection();
 
 kazagumo.on("playerStart", (player, track) => {
   const channel = client.channels.cache.get(player.textId);
   if (channel)
     channel.send(`🎵 Now playing: **${track.title}** by **${track.author}**`);
 
-  // Bot status update
+  // Bot activity status
   client.user.setActivity(`🎵 ${track.title} - ${track.author}`, { type: 2 });
+
+  // Voice Channel Status
+  client.rest
+    .put(`/channels/${player.voiceId}/voice-status`, {
+      body: { status: `🎵 ${track.title} — ${track.author}` },
+    })
+    .catch((e) => console.error("VC Status Error:", e.message));
 });
 
 kazagumo.on("playerEnd", (player) => {
@@ -68,24 +80,18 @@ kazagumo.on("playerEnd", (player) => {
 
 kazagumo.on("playerEmpty", (player) => {
   client.user.setActivity("🎵 Shimizu Music | .help", { type: 2 });
+
+  // VC Status clear
+  client.rest
+    .put(`/channels/${player.voiceId}/voice-status`, { body: { status: "" } })
+    .catch((e) => console.error("VC Status Clear Error:", e.message));
+
   setTimeout(() => {
     const currentPlayer = client.kazagumo.players.get(player.guildId);
     if (currentPlayer && !currentPlayer.playing && !currentPlayer.paused) {
       const channel = client.channels.cache.get(player.textId);
       if (channel)
         channel.send("✅ Queue finished! Shimizu Music has disconnected.");
-      currentPlayer.destroy();
-    }
-  }, 120000);
-});
-
-kazagumo.on("playerEmpty", (player) => {
-  setTimeout(() => {
-    const currentPlayer = client.kazagumo.players.get(player.guildId);
-    if (currentPlayer && !currentPlayer.playing && !currentPlayer.paused) {
-      const channel = client.channels.cache.get(player.textId);
-      if (channel)
-        channel.send("✅ Queue ended! Shimizu Music has disconnected.");
       currentPlayer.destroy();
     }
   }, 120000);
@@ -181,9 +187,7 @@ client.on("interactionCreate", async (interaction) => {
     }
   }
 });
-const MAINTENANCE_MODE = false;
-const MAINTENANCE_MESSAGE =
-  "🔧 Shimizu Music is currently under maintenance. Please wait a while and try again!";
+
 client.once("ready", () => {
   console.log(`✅ ${client.user.tag} is online! - Shimizu Music`);
   client.user.setActivity("🎵 Shimizu Music", { type: 2 });
@@ -223,6 +227,9 @@ client.on("messageCreate", async (message) => {
     f: "filter",
     h: "help",
     help: "help",
+    ly: "lyrics",
+    lyrics: "lyrics",
+    setprefix: "setprefix",
   };
 
   const resolvedName = aliases[commandName] || commandName;
