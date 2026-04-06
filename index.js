@@ -207,6 +207,39 @@ kazagumo.on("playerEmpty", (player) => {
   }, 120000);
 });
 
+// Alone in VC - leave in 5s
+client.on("voiceStateUpdate", (oldState, newState) => {
+  const player = client.kazagumo.players.get(
+    oldState.guild.id || newState.guild.id,
+  );
+  if (!player) return;
+
+  const voiceChannel = oldState.guild.channels.cache.get(player.voiceId);
+  if (!voiceChannel) return;
+
+  // Sirf bot hai VC mein
+  const members = voiceChannel.members.filter((m) => !m.user.bot);
+  if (members.size === 0) {
+    setTimeout(() => {
+      const currentPlayer = client.kazagumo.players.get(
+        oldState.guild.id || newState.guild.id,
+      );
+      if (!currentPlayer) return;
+
+      const vc = oldState.guild.channels.cache.get(currentPlayer.voiceId);
+      if (!vc) return;
+
+      const humans = vc.members.filter((m) => !m.user.bot);
+      if (humans.size === 0) {
+        const channel = client.channels.cache.get(currentPlayer.textId);
+        if (channel)
+          channel.send("👋 Everyone left! Shimizu Music has disconnected.");
+        currentPlayer.destroy();
+      }
+    }, 5000);
+  }
+});
+
 const commandsPath = path.join(__dirname, "commands/music");
 const commandFiles = fs
   .readdirSync(commandsPath)
