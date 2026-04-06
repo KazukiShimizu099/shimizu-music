@@ -57,6 +57,26 @@ kazagumo.on("playerStart", (player, track) => {
   const channel = client.channels.cache.get(player.textId);
   if (channel)
     channel.send(`🎵 Now playing: **${track.title}** by **${track.author}**`);
+
+  // Bot status update
+  client.user.setActivity(`🎵 ${track.title} - ${track.author}`, { type: 2 });
+});
+
+kazagumo.on("playerEnd", (player) => {
+  client.user.setActivity("🎵 Shimizu Music", { type: 2 });
+});
+
+kazagumo.on("playerEmpty", (player) => {
+  client.user.setActivity("🎵 Shimizu Music | .help", { type: 2 });
+  setTimeout(() => {
+    const currentPlayer = client.kazagumo.players.get(player.guildId);
+    if (currentPlayer && !currentPlayer.playing && !currentPlayer.paused) {
+      const channel = client.channels.cache.get(player.textId);
+      if (channel)
+        channel.send("✅ Queue finished! Shimizu Music has disconnected.");
+      currentPlayer.destroy();
+    }
+  }, 120000);
 });
 
 kazagumo.on("playerEmpty", (player) => {
