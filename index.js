@@ -60,8 +60,6 @@ kazagumo.shoukaku.on("error", (name, error) => {
 
 kazagumo.on("playerStart", (player, track) => {
   const channel = client.channels.cache.get(player.textId);
-  if (channel)
-    channel.send(`🎵 Now playing: **${track.title}** by **${track.author}**`);
 
   // Bot activity status
   client.user.setActivity(`🎵 ${track.title} - ${track.author}`, { type: 2 });
@@ -72,6 +70,123 @@ kazagumo.on("playerStart", (player, track) => {
       body: { status: `🎵 ${track.title} — ${track.author}` },
     })
     .catch((e) => console.error("VC Status Error:", e.message));
+
+  if (!channel) return;
+
+  const {
+    EmbedBuilder,
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+  } = require("discord.js");
+  const duration = track.length;
+
+  function msToTime(ms) {
+    if (!ms) return "0:00";
+    const minutes = Math.floor(ms / 60000);
+    const seconds = ((ms % 60000) / 1000).toFixed(0);
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  }
+
+  function buildProgressBar(position, total) {
+    const barLength = 20;
+    const progress = Math.min(
+      Math.floor((position / total) * barLength),
+      barLength,
+    );
+    return "▓".repeat(progress) + "░".repeat(barLength - progress);
+  }
+
+  const youtubeThumbnail =
+    track.uri && track.uri.includes("youtube")
+      ? `https://img.youtube.com/vi/${track.uri.split("v=")[1]?.split("&")[0]}/maxresdefault.jpg`
+      : track.thumbnail || null;
+
+  const animatedBg = "https://cdn.pfps.gg/banners/3752-anime.gif";
+
+  function buildEmbed(position) {
+    const progressBar = buildProgressBar(position, duration);
+    const embed = new EmbedBuilder()
+      .setColor("#FF6B9D")
+      .setAuthor({
+        name: "✨ Shimizu Music — Now Playing",
+        iconURL: client.user.displayAvatarURL(),
+      })
+      .setDescription(
+        [
+          `## 🎵 ${track.title}`,
+          ``,
+          `**🎤 Artist:** ${track.author || "Unknown"}`,
+          `**⏱️ Duration:** \`${msToTime(position)} / ${msToTime(duration)}\``,
+          `**📋 Queue:** \`${player.queue.tracks?.length || 0} songs remaining\``,
+          `**🔁 Loop:** ${player.loop === "track" ? "Track 🔂" : player.loop === "queue" ? "Queue 🔁" : "Off"}`,
+          `**🔊 Volume:** ${player.volume}%`,
+          `> 👤 ${track.requester ? `<@${track.requester.id}>` : "Unknown"}`,
+          ``,
+          `\`${msToTime(position)}\` ${progressBar} \`${msToTime(duration)}\``,
+        ].join("\n"),
+      )
+      .setImage(animatedBg)
+      .setThumbnail(youtubeThumbnail)
+      .setFooter({
+        text: "꒰ Shimizu Music 🌸 ꒱ • Live updating",
+        iconURL: client.user.displayAvatarURL(),
+      })
+      .setTimestamp();
+
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId("pause_resume")
+        .setLabel("⏸ Pause")
+        .setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder()
+        .setCustomId("skip")
+        .setLabel("⏭ Skip")
+        .setStyle(ButtonStyle.Primary),
+      new ButtonBuilder()
+        .setCustomId("stop")
+        .setLabel("⏹ Stop")
+        .setStyle(ButtonStyle.Danger),
+      new ButtonBuilder()
+        .setCustomId("loop")
+        .setLabel("🔁 Loop")
+        .setStyle(ButtonStyle.Success),
+      new ButtonBuilder()
+        .setCustomId("shuffle")
+        .setLabel("🔀 Shuffle")
+        .setStyle(ButtonStyle.Secondary),
+    );
+
+    return { embeds: [embed], components: [row] };
+  }
+
+  // Naya player message bhejo
+  channel
+    .send(buildEmbed(0))
+    .then((msg) => {
+      const interval = setInterval(async () => {
+        try {
+          const currentPlayer = client.kazagumo.players.get(player.guildId);
+          if (!currentPlayer || !currentPlayer.queue.current) {
+            clearInterval(interval);
+            return;
+          }
+          // Naya song start ho gaya toh purana interval band karo
+          if (currentPlayer.queue.current.uri !== track.uri) {
+            clearInterval(interval);
+            return;
+          }
+          const pos = currentPlayer.shoukaku?.position || 0;
+          await msg.edit(buildEmbed(pos));
+          if (pos >= duration - 5000) clearInterval(interval);
+        } catch (e) {
+          clearInterval(interval);
+        }
+      }, 5000);
+
+      setTimeout(() => clearInterval(interval), 600000);
+    })
+    .catch(console.error);
 });
 
 kazagumo.on("playerEnd", (player) => {
