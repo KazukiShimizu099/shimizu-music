@@ -15,6 +15,7 @@
     "discord.js": "^14.26.2",
     "dotenv": "^17.4.1",
     "kazagumo": "^3.4.3",
+    "node-fetch": "^2.7.0",
     "shoukaku": "^4.3.0",
     "sodium-native": "^5.1.0"
   }
