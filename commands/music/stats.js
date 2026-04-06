@@ -9,7 +9,7 @@ module.exports = {
     .setDescription("Shimizu Music - Bot statistics"),
 
   async execute(interaction, client) {
-    if (interaction.user.id !== OWNER_ID) {
+    if (interaction.user.id !== 1382614880137379921) {
       return interaction.reply({
         content: "❌ This command is only for the bot owner!",
         ephemeral: true,
