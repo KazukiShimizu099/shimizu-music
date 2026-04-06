@@ -1,10 +1,4 @@
-const {
-  SlashCommandBuilder,
-  EmbedBuilder,
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-} = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -12,7 +6,7 @@ module.exports = {
     .setDescription("Shimizu Music - All commands list"),
 
   async execute(interaction, client) {
-    const mainEmbed = new EmbedBuilder()
+    const embed = new EmbedBuilder()
       .setColor("#FF6B9D")
       .setAuthor({
         name: "Shimizu Music - Command Center",
@@ -22,7 +16,7 @@ module.exports = {
         [
           "## ✨ Shimizu Music — Full Command List",
           "**Default Prefix:** `.` | **Slash:** `/`",
-          "Every `.command` also works as `/command` and vice versa.",
+          "Every `.command` works as `/command` and vice versa.",
           "",
           "━━━━━━━━━━━━━━━━━━━━━━",
         ].join("\n"),
@@ -38,8 +32,8 @@ module.exports = {
             "`.resume` `.r` `/resume` — Resume paused song",
             "`.nowplaying` `.np` `/nowplaying` — Show current song info",
             "`.queue` `.q` `/queue` — Show current queue",
-            "`.loop` `.l` `/loop` — Toggle song loop on/off",
-            "`.shuffle` — Shuffle the queue",
+            "`.loop` `.l` `/loop` — Toggle loop (Track > Queue > Off)",
+            "`.shuffle` `/shuffle` — Shuffle the queue",
             "`.volume` `.v` `/volume` `<1-100>` — Set volume",
           ].join("\n"),
         },
@@ -58,7 +52,7 @@ module.exports = {
           name: "🎶 Lyrics",
           value: [
             "`.lyrics` `.ly` `/lyrics` — Get lyrics of current song",
-            "> Powered by LRCLIB — free & no API key needed",
+            "> Powered by LRCLIB + Genius — Real-time synced when available",
           ].join("\n"),
         },
         {
@@ -80,25 +74,28 @@ module.exports = {
             "⏸ **Pause/Resume** — Toggle pause",
             "⏭ **Skip** — Skip to next song",
             "⏹ **Stop** — Stop & disconnect",
-            "🔁 **Loop** — Toggle loop mode",
+            "🔁 **Loop** — Toggle loop mode (Track > Queue > Off)",
             "🔀 **Shuffle** — Shuffle queue",
-            "> Buttons appear on every `/play` response",
+            "> Buttons appear automatically on every song",
           ].join("\n"),
         },
         {
-          name: "⚙️ Server Settings",
+          name: "📊 Stats & Settings",
           value: [
+            "`.stats` `/stats` — View bot statistics",
             "`/setprefix prefix:X` — Change server prefix *(Admin only)*",
             "> Default prefix is `.`",
             "> Example: `/setprefix prefix:!`",
-            "> Example: `/setprefix prefix:$`",
           ].join("\n"),
         },
         {
-          name: "🔧 Maintenance",
+          name: "🤖 Auto Features",
           value: [
-            "Bot shows maintenance message when under maintenance",
-            "> Contact bot owner if bot is unavailable",
+            "> 🎵 Live progress bar updates every 2 seconds",
+            "> 👋 Auto-leave when everyone leaves VC (5s)",
+            "> ⏱️ Auto-leave after queue ends (2 min)",
+            "> 📢 VC status updates with current song",
+            "> 🔧 Maintenance mode when bot is unavailable",
           ].join("\n"),
         },
         {
@@ -110,29 +107,26 @@ module.exports = {
             "`.f bassboost` — Apply bass boost",
             "`.ly` — Get current song lyrics",
             "`/playlist create name:myfav` — Create playlist",
-            "`/playlist add name:myfav` — Add song to playlist",
             "`/playlist play name:myfav` — Play playlist",
             "`/setprefix prefix:!` — Change prefix to !",
           ].join("\n"),
         },
       )
-      .setImage(
-        "https://imgs.search.brave.com/1EF1VQWuHHs4aDNFYF3ky3Wi6yb9ukcETixsOHHSvF4/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzL2ExLzNk/L2ZjL2ExM2RmYzAz/ZTNmYThlZjIxZDcw/OTkyZGQxYTgzNDg4/LmpwZw",
-      )
+      .setImage("https://i.imgur.com/4M7IWwP.png")
       .setFooter({
-        text: "꒰ Shimizu Music 🌸 ꒱ • Use / or . prefix for all commands",
+        text: "꒰ Shimizu Music 🌸 ꒱ • Made with ❤️ by KazukiShimizu",
         iconURL: client.user.displayAvatarURL(),
       })
       .setTimestamp();
 
     try {
       if (interaction.deferred) {
-        await interaction.editReply({ embeds: [mainEmbed] });
+        await interaction.editReply({ embeds: [embed] });
       } else {
-        await interaction.reply({ embeds: [mainEmbed] });
+        await interaction.reply({ embeds: [embed] });
       }
     } catch (e) {
-      interaction.channel.send({ embeds: [mainEmbed] });
+      interaction.channel.send({ embeds: [embed] });
     }
   },
 };
