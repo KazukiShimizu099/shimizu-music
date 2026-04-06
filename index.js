@@ -68,7 +68,7 @@ kazagumo.on("playerEmpty", (player) => {
         channel.send("✅ Queue ended! Shimizu Music has disconnected.");
       currentPlayer.destroy();
     }
-  }, 5000);
+  }, 120000);
 });
 
 const commandsPath = path.join(__dirname, "commands/music");
