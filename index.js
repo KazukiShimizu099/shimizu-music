@@ -1,6 +1,12 @@
 const { Client, GatewayIntentBits, Collection } = require("discord.js");
 const { Kazagumo } = require("kazagumo");
 const { Connectors } = require("shoukaku");
+const {
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+} = require("discord.js");
 const fs = require("fs");
 const path = require("path");
 require("dotenv").config();
@@ -53,18 +59,33 @@ const kazagumo = new Kazagumo(
 
 client.kazagumo = kazagumo;
 client.commands = new Collection();
+client.vcTime = 0;
 
 kazagumo.shoukaku.on("error", (name, error) => {
   console.error(`Lavalink Node Error (${name}):`, error.message);
 });
 
+function msToTime(ms) {
+  if (!ms) return "0:00";
+  const minutes = Math.floor(ms / 60000);
+  const seconds = ((ms % 60000) / 1000).toFixed(0);
+  return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+}
+
+function buildProgressBar(position, total) {
+  const barLength = 20;
+  const progress = Math.min(
+    Math.floor((position / total) * barLength),
+    barLength,
+  );
+  return "▓".repeat(progress) + "░".repeat(barLength - progress);
+}
+
 kazagumo.on("playerStart", (player, track) => {
   const channel = client.channels.cache.get(player.textId);
 
-  // Bot activity status
   client.user.setActivity(`🎵 ${track.title} - ${track.author}`, { type: 2 });
 
-  // Voice Channel Status
   client.rest
     .put(`/channels/${player.voiceId}/voice-status`, {
       body: { status: `🎵 ${track.title} — ${track.author}` },
@@ -73,30 +94,7 @@ kazagumo.on("playerStart", (player, track) => {
 
   if (!channel) return;
 
-  const {
-    EmbedBuilder,
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle,
-  } = require("discord.js");
   const duration = track.length;
-
-  function msToTime(ms) {
-    if (!ms) return "0:00";
-    const minutes = Math.floor(ms / 60000);
-    const seconds = ((ms % 60000) / 1000).toFixed(0);
-    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-  }
-
-  function buildProgressBar(position, total) {
-    const barLength = 20;
-    const progress = Math.min(
-      Math.floor((position / total) * barLength),
-      barLength,
-    );
-    return "▓".repeat(progress) + "░".repeat(barLength - progress);
-  }
-
   const youtubeThumbnail =
     track.uri && track.uri.includes("youtube")
       ? `https://img.youtube.com/vi/${track.uri.split("v=")[1]?.split("&")[0]}/maxresdefault.jpg`
@@ -160,7 +158,6 @@ kazagumo.on("playerStart", (player, track) => {
     return { embeds: [embed], components: [row] };
   }
 
-  // Naya player message bhejo
   channel
     .send(buildEmbed(0))
     .then((msg) => {
@@ -171,18 +168,17 @@ kazagumo.on("playerStart", (player, track) => {
             clearInterval(interval);
             return;
           }
-          // Naya song start ho gaya toh purana interval band karo
           if (currentPlayer.queue.current.uri !== track.uri) {
             clearInterval(interval);
             return;
           }
           const pos = currentPlayer.shoukaku?.position || 0;
           await msg.edit(buildEmbed(pos));
-          if (pos >= duration - 5000) clearInterval(interval);
+          if (pos >= duration - 2000) clearInterval(interval);
         } catch (e) {
           clearInterval(interval);
         }
-      }, 1000);
+      }, 2000);
 
       setTimeout(() => clearInterval(interval), 600000);
     })
@@ -196,7 +192,6 @@ kazagumo.on("playerEnd", (player) => {
 kazagumo.on("playerEmpty", (player) => {
   client.user.setActivity("🎵 Shimizu Music | .help", { type: 2 });
 
-  // VC Status clear
   client.rest
     .put(`/channels/${player.voiceId}/voice-status`, { body: { status: "" } })
     .catch((e) => console.error("VC Status Clear Error:", e.message));
@@ -286,7 +281,16 @@ client.on("interactionCreate", async (interaction) => {
       case "loop":
         if (player.loop === "none") {
           player.setLoop("track");
-          await interaction.reply({ content: "🔁 Loop: ON", ephemeral: true });
+          await interaction.reply({
+            content: "🔁 Loop: Track ON",
+            ephemeral: true,
+          });
+        } else if (player.loop === "track") {
+          player.setLoop("queue");
+          await interaction.reply({
+            content: "🔁 Loop: Queue ON",
+            ephemeral: true,
+          });
         } else {
           player.setLoop("none");
           await interaction.reply({ content: "🔁 Loop: OFF", ephemeral: true });
@@ -295,7 +299,7 @@ client.on("interactionCreate", async (interaction) => {
       case "shuffle":
         player.queue.shuffle();
         await interaction.reply({
-          content: "🔀 Queue has been shuffled!",
+          content: "🔀 Queue shuffled!",
           ephemeral: true,
         });
         break;
@@ -305,7 +309,16 @@ client.on("interactionCreate", async (interaction) => {
 
 client.once("ready", () => {
   console.log(`✅ ${client.user.tag} is online! - Shimizu Music`);
+  console.log(`📊 Servers: ${client.guilds.cache.size}`);
   client.user.setActivity("🎵 Shimizu Music", { type: 2 });
+
+  // VC Time tracker
+  setInterval(() => {
+    const activePlayers = client.kazagumo.players.size;
+    if (activePlayers > 0) {
+      client.vcTime += activePlayers;
+    }
+  }, 1000);
 });
 
 const CONFIG_FILE = path.join(__dirname, "serverconfig.json");
@@ -320,9 +333,8 @@ function getPrefix(guildId) {
 
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
-  if (MAINTENANCE_MODE) {
-    return message.reply(MAINTENANCE_MESSAGE);
-  }
+  if (MAINTENANCE_MODE) return message.reply(MAINTENANCE_MESSAGE);
+
   const prefix = getPrefix(message.guild?.id);
   if (!message.content.startsWith(prefix)) return;
 
@@ -345,6 +357,7 @@ client.on("messageCreate", async (message) => {
     ly: "lyrics",
     lyrics: "lyrics",
     setprefix: "setprefix",
+    stats: "stats",
   };
 
   const resolvedName = aliases[commandName] || commandName;
@@ -368,6 +381,7 @@ client.on("messageCreate", async (message) => {
         if (name === "name") return args[0] || null;
         if (name === "type") return args[0] || null;
         if (name === "amount") return args[0] || null;
+        if (name === "mode") return args[0] || null;
         return args[0] || null;
       },
       getInteger: (name) => {
