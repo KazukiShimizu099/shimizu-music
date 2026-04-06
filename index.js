@@ -35,7 +35,9 @@ const nodes = [
   },
 ];
 
-const kazagumo = new Kazagumo(
+kazagumo.shoukaku.on('error', (name, error) => {
+  console.error(`Lavalink Node Error (${name}):`, error.message);
+});
   {
     defaultSearchEngine: "youtube",
     send: (guildId, payload) => {
