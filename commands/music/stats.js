@@ -9,12 +9,14 @@ module.exports = {
     .setDescription("Shimizu Music - Bot statistics"),
 
   async execute(interaction, client) {
-    if (interaction.user.id !== YOU_ID) {
+    if (interaction.user.id !== OWNER_ID) {
       return interaction.reply({
         content: "❌ This command is only for the bot owner!",
         ephemeral: true,
       });
     }
+
+    await interaction.deferReply({ ephemeral: true });
 
     const totalServers = client.guilds.cache.size;
     const totalUsers = client.guilds.cache.reduce(
@@ -37,20 +39,32 @@ module.exports = {
     const memUsage = Math.round(process.memoryUsage().heapUsed / 1024 / 1024);
     const totalMem = Math.round(os.totalmem() / 1024 / 1024);
     const cpuLoad = os.loadavg()[0].toFixed(2);
-
     const nodeVersion = process.version;
     const discordVersion = require("discord.js").version;
+
+    // Lavalink nodes status
+    const nodesStatus =
+      [...client.kazagumo.shoukaku.nodes.values()]
+        .map((node) => {
+          const state = node.state === 1 ? "🟢 Online" : "🔴 Offline";
+          const players = node.stats?.playingPlayers || 0;
+          const memory = node.stats?.memory
+            ? `${Math.round(node.stats.memory.used / 1024 / 1024)}MB`
+            : "N/A";
+          return `**${node.name}:** ${state} | Players: ${players} | RAM: ${memory}`;
+        })
+        .join("\n") || "No nodes connected";
 
     const embed = new EmbedBuilder()
       .setColor("#FF6B9D")
       .setAuthor({
-        name: "Shimizu Music — Owner Statistics",
+        name: "Shimizu Music — Owner Dashboard",
         iconURL: client.user.displayAvatarURL(),
       })
-      .setDescription("> 🔒 Owner only — Real-time bot statistics")
+      .setDescription("> 🔒 Restricted to bot owner only")
       .addFields(
         {
-          name: "🌐 Bot Info",
+          name: "🌐 Bot Overview",
           value: [
             `**Servers:** ${totalServers}`,
             `**Total Users:** ${totalUsers.toLocaleString()}`,
@@ -79,29 +93,16 @@ module.exports = {
         },
         {
           name: "🎵 Lavalink Nodes",
-          value:
-            client.kazagumo.shoukaku.nodes.size > 0
-              ? [...client.kazagumo.shoukaku.nodes.values()]
-                  .map(
-                    (node) =>
-                      `**${node.name}:** ${node.state === 1 ? "🟢 Online" : "🔴 Offline"} | Players: ${node.stats?.playingPlayers || 0}`,
-                  )
-                  .join("\n")
-              : "No nodes connected",
+          value: nodesStatus,
           inline: false,
         },
       )
-      .setFooter({ text: "Shimizu Music 🎶 | Made by KazukiShimizu" })
+      .setFooter({
+        text: "Shimizu Music 🎶 | Made by KazukiShimizu",
+        iconURL: client.user.displayAvatarURL(),
+      })
       .setTimestamp();
 
-    try {
-      if (interaction.deferred) {
-        await interaction.editReply({ embeds: [embed] });
-      } else {
-        await interaction.reply({ embeds: [embed] });
-      }
-    } catch (e) {
-      interaction.channel.send({ embeds: [embed] });
-    }
+    await interaction.editReply({ embeds: [embed] });
   },
 };
