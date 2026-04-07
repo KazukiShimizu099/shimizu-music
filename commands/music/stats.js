@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const os = require("os");
 
-const OWNER_ID = "TUMHARA_DISCORD_USER_ID";
+const OWNER_ID = "1382614880137379921";
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -9,7 +9,7 @@ module.exports = {
     .setDescription("Shimizu Music - Bot statistics"),
 
   async execute(interaction, client) {
-    if (interaction.user.id !==1382614880137379921) {
+    if (interaction.user.id !== YOU_ID) {
       return interaction.reply({
         content: "❌ This command is only for the bot owner!",
         ephemeral: true,
