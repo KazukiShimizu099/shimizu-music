@@ -39,8 +39,8 @@ const nodes = [
   },
   {
     name: "Node3",
-    url: "lavalink.jirayu.net:443",
-    auth: "youshallnotpass",
+    url: "lavalink.serenetia.com:443",
+    auth: "https://dsc.gg/ajidevserver",
     secure: true,
   },
 ];
