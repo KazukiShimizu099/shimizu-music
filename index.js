@@ -33,16 +33,16 @@ const nodes = [
   },
   {
     name: "Node2",
-    url: "lavalink.jirayu.net:443",
-    auth: "youshallnotpass",
-    secure: true,
-  },
-  {
-    name: "Node3",
     url: "lavalinkv4.serenetia.com:443",
     auth: "https://dsc.gg/ajidevserver",
     secure: true,
   },
+  {
+    name: "Node3",
+    url: "lavalink.jirayu.net:443",
+    auth: "youshallnotpass",
+    secure: true,
+  },w
 ];
 
 const kazagumo = new Kazagumo(
