@@ -42,7 +42,7 @@ const nodes = [
     url: "lavalink.jirayu.net:443",
     auth: "youshallnotpass",
     secure: true,
-  },w
+  },
 ];
 
 const kazagumo = new Kazagumo(
