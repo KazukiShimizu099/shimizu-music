@@ -189,9 +189,41 @@ kazagumo.on("playerEnd", (player) => {
   client.user.setActivity("🎵 Shimizu Music", { type: 2 });
 });
 
-kazagumo.on("playerEmpty", (player) => {
-  client.user.setActivity("🎵 Shimizu Music | .help", { type: 2 });
+kazagumo.on("playerEmpty", async (player) => {
+  // Autoplay - related song fetch karo
+  try {
+    const lastTrack = player.queue.current;
+    if (lastTrack && lastTrack.uri && lastTrack.uri.includes("youtube")) {
+      const videoId = lastTrack.uri.split("v=")[1]?.split("&")[0];
+      if (videoId) {
+        const result = await client.kazagumo.search(
+          `https://www.youtube.com/watch?v=${videoId}&list=RD${videoId}`,
+          { requester: client.user },
+        );
+        if (result && result.tracks.length > 1) {
+          const randomIndex =
+            Math.floor(Math.random() * Math.min(result.tracks.length - 1, 5)) +
+            1;
+          const randomTrack = result.tracks[randomIndex];
+          if (randomTrack) {
+            player.queue.add(randomTrack);
+            await player.play();
+            const channel = client.channels.cache.get(player.textId);
+            if (channel)
+              channel.send(
+                `🎵 Autoplay: **${randomTrack.title}** by **${randomTrack.author}**`,
+              );
+            return;
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.error("Autoplay error:", e.message);
+  }
 
+  // Autoplay fail hua toh normal disconnect
+  client.user.setActivity("🎵 Shimizu Music | .help", { type: 2 });
   client.rest
     .put(`/channels/${player.voiceId}/voice-status`, { body: { status: "" } })
     .catch((e) => console.error("VC Status Clear Error:", e.message));
