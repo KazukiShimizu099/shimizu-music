@@ -39,8 +39,8 @@ const nodes = [
   },
   {
     name: "Node3",
-    url: "lavalink.jirayu.net:13592",
-    auth: "youshallnotpass",
+    url: "n3.nexcloud.in:2026",
+    auth: "nexcloud",
     secure: false,
   },
 ];
