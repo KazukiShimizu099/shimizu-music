@@ -26,21 +26,21 @@ const client = new Client({
 
 const nodes = [
   {
-    name: "Jirayu-Main",
-    url: "lavalink.jirayu.net:443",
-    auth: "youshallnotpass",   
+    name: "Node-1",
+    url: "lavalink-v4.triniumhost.com:443",
+    auth: "free",
     secure: true,
   },
   {
-    name: "Serenetia",
+    name: "Node-2",
     url: "lavalinkv4.serenetia.com:443",
     auth: "https://seretia.link/discord",
     secure: true,
   },
   {
-    name: "Jirayu-Backup",
-    url: "lavalink.jirayu.net:13592",
-    auth: "youshallnotpass",
+    name: "Node-3",
+    url: "lava-v4.millohost.my.id:443",
+    auth: "https://discord.gg/mjS5J2K3ep",
     secure: false,
   },
 ];
