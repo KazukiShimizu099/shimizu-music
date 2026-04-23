@@ -27,22 +27,19 @@ const client = new Client({
 const nodes = [
   {
     name: "Jirayu-Main",
-    host: "lavalink.jirayu.net",
-    port: 443,
-    auth: "youshallnotpass",
+    url: "lavalink.jirayu.net:443",
+    auth: "youshallnotpass",   
     secure: true,
   },
   {
     name: "Serenetia",
-    host: "lavalinkv4.serenetia.com",
-    port: 443,
+    url: "lavalinkv4.serenetia.com:443",
     auth: "https://seretia.link/discord",
     secure: true,
   },
   {
     name: "Jirayu-Backup",
-    host: "lavalink.jirayu.net",
-    port: 13592,
+    url: "lavalink.jirayu.net:13592",
     auth: "youshallnotpass",
     secure: false,
   },
