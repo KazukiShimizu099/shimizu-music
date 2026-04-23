@@ -26,22 +26,22 @@ const client = new Client({
 
 const nodes = [
   {
-    Host : lavalink.jirayu.net,
-    Port : 443,
-    Password : "youshallnotpass",
-    Secure : true,
+    Host: "lavalink.jirayu.net",
+    Port: 443,
+    Password: "youshallnotpass",
+    Secure: true,
   },
   {
-    Host : lavalinkv4.serenetia.com,
-    Port : 443,
-    Password : "https://seretia.link/discord",
-    Secure : true,
+    Host: "lavalinkv4.serenetia.com",
+    Port: 443,
+    Password: "https://seretia.link/discord",
+    Secure: true,
   },
   {
-    Host : lavalink.jirayu.net,
-    Port : 13592,
-    Password : "youshallnotpass",
-    Secure : false,
+    Host: "lavalink.jirayu.net",
+    Port: 13592,
+    Password: "youshallnotpass",
+    Secure: false,
   },
 ];
 
