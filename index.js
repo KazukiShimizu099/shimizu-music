@@ -26,22 +26,22 @@ const client = new Client({
 
 const nodes = [
   {
-    name: "Node1",
-    url: "lavalinkv4.serenetia.com:443",
-    auth: "https://dsc.gg/ajidevserver",
-    secure: true,
+    Host : lavalink.jirayu.net,
+    Port : 443,
+    Password : "youshallnotpass",
+    Secure : true,
   },
   {
-    name: "Node2",
-    url: "lavalink.serenetia.com:443",
-    auth: "https://dsc.gg/ajidevserver",
-    secure: true,
+    Host : lavalinkv4.serenetia.com,
+    Port : 443,
+    Password : "https://seretia.link/discord",
+    Secure : true,
   },
   {
-    name: "Node3",
-    url: "n3.nexcloud.in:2026",
-    auth: "nexcloud",
-    secure: false,
+    Host : lavalink-v4.triniumhost.com,
+    Port : 443,
+    Password : "free",
+    Secure : true,
   },
 ];
 
