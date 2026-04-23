@@ -38,10 +38,10 @@ const nodes = [
     Secure : true,
   },
   {
-    Host : lavalink-v4.triniumhost.com,
-    Port : 443,
-    Password : "free",
-    Secure : true,
+    Host : lavalink.jirayu.net,
+    Port : 13592,
+    Password : "youshallnotpass",
+    Secure : false,
   },
 ];
 
