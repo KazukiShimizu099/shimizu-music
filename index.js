@@ -27,9 +27,9 @@ const client = new Client({
 const nodes = [
   {
     name: "Node-1",
-    url: "lavalink-v4.triniumhost.com:443",
-    auth: "free",
-    secure: true,
+    url: "omega.vexanode.cloud:2031",
+    auth: "https://discord.vexanode.cloud",
+    secure: false,
   },
   {
     name: "Node-2",
@@ -39,9 +39,9 @@ const nodes = [
   },
   {
     name: "Node-3",
-    url: "lava-v4.millohost.my.id:443",
-    auth: "https://discord.gg/mjS5J2K3ep",
-    secure: true,
+    url: "lavalink.triniumhost.com:4333",
+    auth: "free",
+    secure: false,
   },
 ];
 
