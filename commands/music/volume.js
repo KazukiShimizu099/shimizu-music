@@ -13,39 +13,54 @@ module.exports = {
         .setMaxValue(200),
     ),
 
-  async execute(interaction, client) {
-    let volume = interaction.options.getInteger("amount");
+  async execute(interaction, client, args) {
+    // 1. Get Volume (Handles Slash and Prefix both)
+    let volume;
+    if (interaction.options) {
+      // For Slash Command
+      volume = interaction.options.getInteger("amount");
+    } else {
+      // For Prefix Command (.v 100)
+      volume = parseInt(args[0]);
+    }
+
+    // 2. Validation
+    if (!volume || isNaN(volume) || volume < 1 || volume > 200) {
+      const msg = "❌ Please provide a valid volume (1-200)\nExample: `.v 150` ya `/volume amount:150`";
+      return interaction.reply ? interaction.reply({ content: msg, ephemeral: true }) : interaction.channel.send(msg);
+    }
 
     const player = client.kazagumo.players.get(interaction.guildId);
 
     if (!player) {
-      return interaction.reply({
-        content: "❌ No song is currently playing!",
-        ephemeral: true,
-      });
+      const msg = "❌ No song is currently playing!";
+      return interaction.reply ? interaction.reply({ content: msg, ephemeral: true }) : interaction.channel.send(msg);
     }
 
-    // 1. Bass reduction logic define karo
-    const bassReducer = [
-      { band: 0, gain: -0.15 }, // Lower Bass
-      { band: 1, gain: -0.12 }, // Mid Bass
-      { band: 2, gain: -0.08 }  // Upper Bass
-    ];
+    try {
+      // 3. Bass reduction logic (Prevents 200% distortion)
+      const bassReducer = [
+        { band: 0, gain: -0.15 },
+        { band: 1, gain: -0.12 },
+        { band: 2, gain: -0.08 }
+      ];
 
-    // 2. Volume check karke filters apply karo
-    if (volume > 100) {
-      await player.setFilters({
-        equalizer: bassReducer
-      });
-    } else {
-      await player.clearFilters();
+      if (volume > 100) {
+        await player.setFilters({ equalizer: bassReducer });
+      } else {
+        await player.clearFilters();
+      }
+
+      // 4. Set Volume
+      await player.setVolume(volume);
+
+      const response = `🔊 Volume set to **${volume}%** ${volume > 100 ? "(Bass reduced for clarity)" : ""}`;
+      return interaction.reply ? interaction.reply({ content: response }) : interaction.channel.send(response);
+
+    } catch (error) {
+      console.error(error);
+      const errMsg = "❌ Error applying volume/filters.";
+      return interaction.reply ? interaction.reply({ content: errMsg, ephemeral: true }) : interaction.channel.send(errMsg);
     }
-
-    // 3. Final volume set karo
-    await player.setVolume(volume);
-
-    await interaction.reply({ 
-      content: `🔊 Volume set to **${volume}%** ${volume > 100 ? "(Bass reduced to prevent distortion)" : ""}` 
-    });
   },
 };
