@@ -13,54 +13,59 @@ module.exports = {
         .setMaxValue(200),
     ),
 
-  async execute(interaction, client, args) {
-    // 1. Get Volume (Handles Slash and Prefix both)
-    let volume;
-    if (interaction.options) {
-      // For Slash Command
-      volume = interaction.options.getInteger("amount");
-    } else {
-      // For Prefix Command (.v 100)
-      volume = parseInt(args[0]);
-    }
+  async execute(message, client, args) {
+    const isInteraction = !!message.options;
+    const volume = isInteraction
+      ? message.options.getInteger("amount")
+      : parseInt(args?.[0]);
 
-    // 2. Validation
     if (!volume || isNaN(volume) || volume < 1 || volume > 200) {
-      const msg = "❌ Please provide a valid volume (1-200)\nExample: `.v 150` ya `/volume amount:150`";
-      return interaction.reply ? interaction.reply({ content: msg, ephemeral: true }) : interaction.channel.send(msg);
+      const msg = "❌ Provide valid volume (1-200). Example: `.v 150`";
+      return isInteraction
+        ? message.reply({ content: msg, ephemeral: true })
+        : message.channel.send(msg);
     }
 
-    const player = client.kazagumo.players.get(interaction.guildId);
+    const player = client.kazagumo.players.get(message.guildId);
 
     if (!player) {
-      const msg = "❌ No song is currently playing!";
-      return interaction.reply ? interaction.reply({ content: msg, ephemeral: true }) : interaction.channel.send(msg);
+      const msg = "❌ Nothing is playing!";
+      return isInteraction
+        ? message.reply({ content: msg, ephemeral: true })
+        : message.channel.send(msg);
     }
 
     try {
-      // 3. Bass reduction logic (Prevents 200% distortion)
+      // 1. Equalizer setup
       const bassReducer = [
         { band: 0, gain: -0.15 },
         { band: 1, gain: -0.12 },
-        { band: 2, gain: -0.08 }
+        { band: 2, gain: -0.08 },
       ];
 
+      // 2. Fix: Access shoukaku player for filters
       if (volume > 100) {
-        await player.setFilters({ equalizer: bassReducer });
+        // Kazagumo uses shoukaku property for filters
+        await player.shoukaku.setFilters({
+          equalizer: bassReducer,
+        });
       } else {
-        await player.clearFilters();
+        await player.shoukaku.clearFilters();
       }
 
-      // 4. Set Volume
+      // 3. Set Volume
       await player.setVolume(volume);
 
-      const response = `🔊 Volume set to **${volume}%** ${volume > 100 ? "(Bass reduced for clarity)" : ""}`;
-      return interaction.reply ? interaction.reply({ content: response }) : interaction.channel.send(response);
-
-    } catch (error) {
-      console.error(error);
-      const errMsg = "❌ Error applying volume/filters.";
-      return interaction.reply ? interaction.reply({ content: errMsg, ephemeral: true }) : interaction.channel.send(errMsg);
+      const response = `🔊 Volume set to **${volume}%** ${volume > 100 ? "(Bass reduced to prevent distortion)" : ""}`;
+      return isInteraction
+        ? message.reply({ content: response })
+        : message.channel.send(response);
+    } catch (err) {
+      console.error("LOGS:", err);
+      const errMsg = "❌ Lavalink filter application failed.";
+      return isInteraction
+        ? message.reply({ content: errMsg, ephemeral: true })
+        : message.channel.send(errMsg);
     }
   },
 };
