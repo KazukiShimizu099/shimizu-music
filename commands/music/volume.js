@@ -4,13 +4,14 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName("volume")
     .setDescription("Shimizu Music - Set volume")
-    .addIntegerOption((opt) =>
-      opt
-        .setName("amount")
-        .setDescription("Volume between 1-100")
-        .setRequired(true)
-        .setMinValue(1)
-        .setMaxValue(100),
+    .addIntegerOption(
+      (opt) =>
+        opt
+          .setName("amount")
+          .setDescription("Volume between 1-200") // Updated description
+          .setRequired(true)
+          .setMinValue(1)
+          .setMaxValue(200), // Max value set to 200
     ),
 
   async execute(interaction, client) {
@@ -22,9 +23,10 @@ module.exports = {
       volume = parseInt(interaction.options.getString("amount"));
     }
 
-    if (!volume || isNaN(volume) || volume < 1 || volume > 100) {
+    // Validation range updated to 200
+    if (!volume || isNaN(volume) || volume < 1 || volume > 200) {
       return interaction.reply({
-        content: "❌ Please provide a valid volume (1-100)\nExample: `.v 80`",
+        content: "❌ Please provide a valid volume (1-200)\nExample: `.v 150`",
         ephemeral: true,
       });
     }
