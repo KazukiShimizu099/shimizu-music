@@ -33,14 +33,14 @@ const nodes = [
   },
   {
     name: "Node-2",
-    url: "lavalink-v4.triniumhost.com:443",
-    auth: "free",
+    url: "lavalinkv4.serenetia.com:443",
+    auth: "https://seretia.link/discord",
     secure: true,
   },
   {
     name: "Node-3",
-    url: "lavalinkv4.serenetia.com:443",
-    auth: "https://seretia.link/discord",
+    url: "lavalink-v4.triniumhost.com:443",
+    auth: "free",
     secure: true,
   },
 ];
