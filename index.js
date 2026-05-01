@@ -39,9 +39,9 @@ const nodes = [
   },
   {
     name: "Node-3",
-    url: "",
-    auth: "",
-    secure: ,
+    url: "lavalinkv4.serenetia.com:443",
+    auth: "https://seretia.link/discord",
+    secure: true,
   },
 ];
 
