@@ -38,13 +38,8 @@ const nodes = [
     secure: true,
   },
   {
-    name: "Node-3",
-    url: "sg1-nodelink.nyxbot.appt:3000",
-    auth: "nyxbot.app/support",
-    secure: false,
-  },
   {
-    name: "Node-4",
+    name: "Node-3",
     url: "lavalink.triniumhost.com:4333",
     auth: "free",
     secure: false,
