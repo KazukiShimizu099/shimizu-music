@@ -38,7 +38,6 @@ const nodes = [
     secure: true,
   },
   {
-  {
     name: "Node-3",
     url: "lavalink.triniumhost.com:4333",
     auth: "free",
