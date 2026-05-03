@@ -33,15 +33,15 @@ const nodes = [
   },
   {
     name: "Node-2",
-    url: "lavalinkv4.serenetia.com:443",
-    auth: "https://seretia.link/discord",
-    secure: true,
-  },
-  {
-    name: "Node-3",
     url: "lavalink.jirayu.net:13592",
     auth: "youshallnotpass",
     secure: false,
+  },
+  {
+    name: "Node-3",
+    url: "lavalinkv4.serenetia.com:443",
+    auth: "https://seretia.link/discord",
+    secure: true,
   },
 ];
 
