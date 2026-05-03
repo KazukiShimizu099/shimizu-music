@@ -27,8 +27,8 @@ const client = new Client({
 const nodes = [
   {
     name: "Node-1",
-    url: "lavalink.jirayu.net:443",
-    auth: "youshallnotpass",
+    url: "lava-v4.millohost.my.id:443",
+    auth: "https://discord.gg/mjS5J2K3ep",
     secure: true,
   },
   {
@@ -39,9 +39,9 @@ const nodes = [
   },
   {
     name: "Node-3",
-    url: "lavalink-v4.triniumhost.com:443",
-    auth: "free",
-    secure: true,
+    url: "lavalink.jirayu.net:13592",
+    auth: "youshallnotpass",
+    secure: false,
   },
 ];
 
