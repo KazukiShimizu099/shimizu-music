@@ -22,10 +22,9 @@ module.exports = {
 
     const isUrl = query.startsWith("http://") || query.startsWith("https://");
 
-    // Explicitly forcing Spotify/Web lookups to bypass standard IP blocks
-    // ... baki code same rahega, bas prefix change kar do
-    if (!isUrl) {
-      query = `ytsearch:${query}`;
+    // Switching default raw prefix to a clean public stream identifier
+    if (!isUrl && !query.startsWith("scsearch:") && !query.startsWith("ytsearch:")) {
+      query = `scsearch:${query}`; 
     }
 
     let result;
@@ -38,9 +37,8 @@ module.exports = {
       return interaction.editReply("❌ An error occurred while searching for the song!");
     }
 
-    // Direct return check to prevent cascading command execution errors
     if (!result || !result.tracks || result.tracks.length === 0) {
-      return interaction.editReply("❌ No tracks found! Lavalink source engines are restricted on this IP host.");
+      return interaction.editReply("❌ No tracks found! This engine cannot decode the metadata.");
     }
 
     let player;
@@ -50,7 +48,7 @@ module.exports = {
         textId: interaction.channelId,
         voiceId: voiceChannel.id,
         deaf: true,
-        volume: 80,
+        volume: 90, // Raised volume floor
       });
     } catch (e) {
       console.error(e);
@@ -59,14 +57,16 @@ module.exports = {
 
     if (result.type === "PLAYLIST") {
       for (const track of result.tracks) player.queue.add(track);
-      return interaction.editReply(`✅ Added playlist **${result.playlistName}** (${result.tracks.length} songs) to queue!`);
+      await interaction.editReply(`✅ Added playlist **${result.playlistName}** (${result.tracks.length} songs) to queue!`);
     } else {
       player.queue.add(result.tracks[0]);
       await interaction.editReply(`✅ Added to queue: **${result.tracks[0].title}**`);
     }
 
+    // Force strict voice channel dispatcher execution
     if (!player.playing && !player.paused && player.queue.length > 0) {
       try {
+        console.log("[Shimizu Debug] Triggering player dispatcher execution...");
         await player.play();
       } catch (playError) {
         console.error("[Shimizu Debug] Play Exception:", playError.message);
