@@ -20,14 +20,14 @@ const client = new Client({
 
 const nodes = [
   {
-    name: "Public-Active-Cluster-1",
-    url: "ll.chofisnet.wtf:443",
-    auth: "youshallnotpass",
+    name: "Node-1",
+    url: "lavalinkv4.serenetia.com:443",
+    auth: "https://seretia.link/discord",
     secure: true,
   },
   {
-    name: "Public-Active-Cluster-2",
-    url: "lavalink.lavalink-ts.me:443",
+    name: "Node-2",
+    url: "lavalink.jirayu.net:443",
     auth: "youshallnotpass",
     secure: true,
   }
