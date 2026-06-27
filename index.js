@@ -23,7 +23,8 @@ const nodes = [
     url: "lavalink.jirayu.net:443",
     auth: "youshallnotpass",
     secure: true,
-]
+  }
+];
 
 client.kazagumo = new Kazagumo(
   {
@@ -31,7 +32,7 @@ client.kazagumo = new Kazagumo(
     send: (guildId, payload) => {
       const guild = client.guilds.cache.get(guildId);
       if (guild) guild.shard.send(payload);
-    },
+    };
   },
   new Connectors.DiscordJS(client),
   nodes
