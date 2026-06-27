@@ -1,16 +1,17 @@
 const { Client, GatewayIntentBits } = require("discord.js");
-const { Kazagumo, Connectors } = require("kazagumo");
+const { Kazagumo } = require("kazagumo");
+// Direct package paths handle karenge taaki version undefined exceptions na aayein
+const ShoukakuConnector = require("shoukaku").Connectors.DiscordJS; 
 
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildVoiceStates, // CRITICAL: Voice streaming ke liye zaroori hai
+    GatewayIntentBits.GuildVoiceStates,
   ],
 });
 
-// Highly active public clusters for bypass
 const nodes = [
   {
     name: "Node-1",
@@ -34,9 +35,11 @@ client.kazagumo = new Kazagumo(
       if (guild) guild.shard.send(payload);
     },
   },
-  new Connectors.DiscordJS(client),
+  new ShoukakuConnector(client), // Fixed constructor assignment
   nodes
 );
+
+// Baki ka poora event handling code nichhe same rahega...
 
 // Debug Loggers
 client.kazagumo.on("playerStart", (player, track) => {
