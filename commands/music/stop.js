@@ -1,28 +1,37 @@
-module.exports = {
-  name: "stop",
-  description: "Stop the music and leave the voice channel",
-  async execute(message, args, client) {
-    // Check if the interaction/message context has guildId securely
-    const guildId = message.guild?.id || message.guildId;
-    if (!guildId) return;
+const { SlashCommandBuilder } = require("discord.js");
 
-    // Direct access via safe optional chaining or Kazagumo player cache map
-    const player = client.kazagumo?.players?.get(guildId) || client.kazagumo?.player?.get(guildId);
+module.exports = {
+  data: new SlashCommandBuilder()
+    .setName("stop")
+    .setDescription("Stop the music and leave the voice channel"),
+
+  async execute(interaction, client) {
+    // Handling both Slash Commands and Legacy Messages safely
+    const isInteraction = typeof interaction.reply === "function" && interaction.commandId;
+    const guildId = interaction.guild?.id || interaction.guildId;
+
+    if (isInteraction && !interaction.deferred) {
+      await interaction.deferReply();
+    }
+
+    const player = client.kazagumo?.players?.get(guildId);
 
     if (!player) {
-      if (typeof message.reply === "function") {
-        return message.reply("❌ There is no music playing in this server!");
-      }
-      return;
+      const msg = "❌ There is no active music playing in this server!";
+      return isInteraction ? interaction.editReply(msg) : interaction.reply(msg);
     }
 
     try {
-      player.destroy();
-      if (typeof message.reply === "function") {
-        return message.reply("⏹️ Stopped the player and left the voice channel.");
-      }
+      // Clear queue and completely terminate the live websocket stream channel
+      player.queue.clear();
+      await player.destroy();
+
+      const successMsg = "⏹️ Stopped the player, cleared the queue, and left the voice channel.";
+      return isInteraction ? interaction.editReply(successMsg) : interaction.reply(successMsg);
     } catch (error) {
-      console.error("[Shimizu Debug] Stop command error:", error);
+      console.error("[Shimizu Debug] Critical exception inside Stop pipeline:", error);
+      const errorMsg = "❌ Internal error occurred while halting the stream connection.";
+      return isInteraction ? interaction.editReply(errorMsg) : interaction.reply(errorMsg);
     }
   },
 };
