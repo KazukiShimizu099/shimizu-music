@@ -50,8 +50,36 @@ client.kazagumo.on("playerError", (player, error) => {
   console.error("[Shimizu Debug] Kazagumo Core Player Error:", error);
 });
 
-client.on("ready", () => {
+client.on("ready", async () => {
   console.log(`✅ ${client.user.tag} is online and operational!`);
+
+  try {
+    console.log("[Shimizu Register] Started refreshing application (/) commands.");
+
+    // Yeh line aapke server par automatic commands push kar degi
+    await client.application.commands.set([
+      {
+        name: "play",
+        description: "Shimizu Music - Play a song",
+        options: [
+          {
+            name: "query",
+            type: 3, // 3 represents STRING type in Discord API
+            description: "Enter a song name or URL",
+            required: true
+          }
+        ]
+      },
+      {
+        name: "stop",
+        description: "Stop the music and leave the voice channel"
+      }
+    ]);
+
+    console.log("[Shimizu Register] Successfully reloaded application (/) commands globally.");
+  } catch (error) {
+    console.error("[Shimizu Register Error]:", error);
+  }
 });
 
 // Command Handler Execution Block
