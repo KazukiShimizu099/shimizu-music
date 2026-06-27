@@ -21,12 +21,9 @@ const client = new Client({
 const nodes = [
   {
     name: "Shimizu-Private-Node",
-    url: "private-lavalink-node-production.up.railway.app:8080", // Port ko 443 se badal kar 8080 karo
-    host: "private-lavalink-node-production.up.railway.app",
-    port: 8080,                                                // Strict internal assignment
-    auth: "youshallnotpass",
-    password: "youshallnotpass",
-    secure: false                                              // Port 8080 ke sath hamesha secure false hoga
+    url: "private-lavalink-node-production.up.railway.app:443", // Railway public endpoints always use 443
+    auth: "youshallnotpass",                                    // Shoukaku core key
+    secure: true                                               // Must be true for 443 (SSL)
   }
 ];
 
