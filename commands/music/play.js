@@ -19,8 +19,8 @@ module.exports = {
 
     const isUrl = query.startsWith("http://") || query.startsWith("https://");
 
-    // Forcing strict native SoundCloud track identifier indexing
-    if (!isUrl) {
+    // Fallback to strict native routing if not a direct URL
+    if (!isUrl && !query.startsWith("scsearch:") && !query.startsWith("ytsearch:")) {
       query = `scsearch:${query}`;
     }
 
@@ -32,6 +32,11 @@ module.exports = {
     } catch (e) {
       console.error("[Shimizu Debug] Search Execution Failed:", e);
       return interaction.editReply("❌ An error occurred while searching for the song!");
+    }
+
+    // Critical validation check to block KazagumoError crashes
+    if (!result || !result.tracks || result.tracks.length === 0) {
+      return interaction.editReply("❌ No tracks found! Lavalink couldn't fetch metadata for this engine.");
     }
 
     let player;
@@ -48,15 +53,23 @@ module.exports = {
       return interaction.editReply("❌ Failed to join the voice channel!");
     }
 
-    const tracks = result.type === "PLAYLIST" ? result.tracks : [result.tracks[0]];
-    for (const track of tracks) player.queue.add(track);
-
-    if (!player.playing && !player.paused) await player.play();
-
-    if (tracks.length > 1) {
-      await interaction.editReply(`✅ Added **${tracks.length} songs** to queue!`);
+    // Safely parse and queue the tracks
+    if (result.type === "PLAYLIST") {
+      for (const track of result.tracks) player.queue.add(track);
+      await interaction.editReply(`✅ Added playlist **${result.playlistName}** (${result.tracks.length} songs) to queue!`);
     } else {
-      await interaction.editReply(`✅ Added to queue: **${tracks[0].title}**`);
+      player.queue.add(result.tracks[0]);
+      await interaction.editReply(`✅ Added to queue: **${result.tracks[0].title}**`);
+    }
+
+    // Run player execution only if tracks exist and player is idle
+    if (!player.playing && !player.paused && player.queue.length > 0) {
+      try {
+        await player.play();
+      } catch (playError) {
+        console.error("[Shimizu Debug] Kazagumo Play Error:", playError.message);
+        return interaction.channel.send("❌ Internal Lavalink error encountered during stream playback initiation.");
+      }
     }
   },
 };
