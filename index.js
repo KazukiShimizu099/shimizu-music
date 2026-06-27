@@ -28,9 +28,9 @@ const nodes = [
   {
     name: "Shimizu-Private-Node",
     host: "private-lavalink-node-production.up.railway.app",
-    port: 443,                                             
-    password: "youshallnotpass",                           
-    secure: true                                             
+    port: 443,
+    password: "youshallnotpass",
+    secure: true
   }
 ];
 
