@@ -26,14 +26,12 @@ module.exports = {
 
     let result;
     try {
+      console.log(`[Shimizu Debug] Initiating lookup for query: ${query}`);
       result = await client.kazagumo.search(query, { requester: interaction.user });
+      console.log(`[Shimizu Debug] Raw Kazagumo Response Type: ${result?.type || 'UNKNOWN'}, Tracks Count: ${result?.tracks?.length || 0}`);
     } catch (e) {
-      console.error(e);
+      console.error("[Shimizu Debug] Search Execution Failed:", e);
       return interaction.editReply("❌ An error occurred while searching for the song!");
-    }
-
-    if (!result || !result.tracks || !result.tracks.length) {
-      return interaction.editReply("❌ No results found! Try a different query.");
     }
 
     let player;
