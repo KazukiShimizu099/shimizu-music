@@ -30,17 +30,24 @@ if (fs.existsSync(musicPath)) {
   }
 }
 
+// CRITICAL FIX: Restored your exact working nodes from original setup
 const nodes = [
   {
-    name: "Node-1",
+    name: "Node1",
+    url: "lavalink.jirayu.net:13592",
+    auth: "youshallnotpass",
+    secure: false,
+  },
+  {
+    name: "Node2",
     url: "lavalinkv4.serenetia.com:443",
-    auth: "https://seretia.link/discord",
+    auth: "https://dsc.gg/ajidevserver",
     secure: true,
   },
   {
-    name: "Node-2",
-    url: "lavalink.jirayu.net:443",
-    auth: "youshallnotpass",
+    name: "Node3",
+    url: "lavalink.serenetia.com:443",
+    auth: "https://dsc.gg/ajidevserver",
     secure: true,
   },
 ];
@@ -72,7 +79,6 @@ client.kazagumo.on("playerEmpty", (player) => {
   } catch (err) {}
 });
 
-// FIXED: Added strict Try-Catch to prevent 'Player is already destroyed' container crashes
 client.on("voiceStateUpdate", (oldState, newState) => {
   const player = client.kazagumo.players.get(oldState.guild.id);
   if (!player) return;
@@ -85,7 +91,6 @@ client.on("voiceStateUpdate", (oldState, newState) => {
     ) {
       return player.destroy();
     }
-
     if (
       oldState.channelId &&
       oldState.channel.members.size === 1 &&
@@ -96,9 +101,7 @@ client.on("voiceStateUpdate", (oldState, newState) => {
         channel.send("🚶 Everyone left. Disconnecting.").catch(() => {});
       return player.destroy();
     }
-  } catch (error) {
-    // Suppress redundant destroy errors
-  }
+  } catch (error) {}
 });
 
 client.on("ready", async () => {
@@ -184,7 +187,6 @@ client.on("messageCreate", async (message) => {
   }
 });
 
-// CRITICAL: Global catchers to strictly prevent Railway container from crashing on background errors
 process.on("unhandledRejection", (error) =>
   console.error("[System Fallback] Unhandled Rejection:", error),
 );
