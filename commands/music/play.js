@@ -25,7 +25,7 @@ module.exports = {
     // Explicitly forcing Spotify/Web lookups to bypass standard IP blocks
     // ... baki code same rahega, bas prefix change kar do
     if (!isUrl) {
-      query = `ytsearch:${query}`; // Public node par ytsearch flawlessly kaam karega
+      query = `ytsearch:${query}`;
     }
 
     let result;

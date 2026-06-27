@@ -20,9 +20,15 @@ const client = new Client({
 
 const nodes = [
   {
-    name: "Shimizu-Public-Bypass",
-    url: "lavalink.blooket.gq:443", // Shoukaku v4 requires 'url' combining host and port
-    auth: "youshallnotpass",        // Shoukaku v4 expects 'auth' instead of password
+    name: "Public-Active-Cluster-1",
+    url: "ll.chofisnet.wtf:443",
+    auth: "youshallnotpass",
+    secure: true,
+  },
+  {
+    name: "Public-Active-Cluster-2",
+    url: "lavalink.lavalink-ts.me:443",
+    auth: "youshallnotpass",
     secure: true,
   }
 ];
