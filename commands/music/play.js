@@ -50,8 +50,8 @@ module.exports = {
         guildId: interaction.guildId,
         textId: interaction.channelId,
         voiceId: voiceChannel.id,
-        deaf: true,
-        volume: 100,
+        deaf: true,       // Self-deaf true taaki Discord bot ko stream process karne de
+        volume: 80,       // Default safe stream volume 80% par set karo for initialization
       });
     } catch (e) {
       console.error(e);
