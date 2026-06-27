@@ -1,9 +1,5 @@
 const {
   SlashCommandBuilder,
-  EmbedBuilder,
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
 } = require("discord.js");
 
 module.exports = {
@@ -19,30 +15,21 @@ module.exports = {
 
   async execute(interaction, client) {
     await interaction.deferReply();
-    let query = interaction.options.getString("query");
+    const query = interaction.options.getString("query");
     const voiceChannel = interaction.member.voice.channel;
 
     if (!voiceChannel) {
       return interaction.editReply("❌ Please join a voice channel first!");
     }
 
-    // Checking if the query is a direct link or just a song name
-    const isUrl = query.startsWith("http://") || query.startsWith("https://");
-
-    // If it's just a song name, explicitly prepend SoundCloud search prefix to bypass YouTube IP block
-    if (!isUrl) {
-      query = `scsearch:${query}`;
-    }
-
     let result;
     try {
-      // Forcing the dynamic engine parameter based on query type
+      // Kazagumo will now use the default engine from index.js securely
       result = await client.kazagumo.search(query, {
         requester: interaction.user,
-        engine: isUrl ? undefined : "soundcloud" 
       });
     } catch (e) {
-      console.error("Kazagumo Search Error Details:", e); // Railway logs me exact breakdown dekhne ke liye
+      console.error(e);
       return interaction.editReply(
         "❌ An error occurred while searching for the song!",
       );

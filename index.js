@@ -29,14 +29,14 @@ const nodes = [
 
 const kazagumo = new Kazagumo(
   {
-    defaultSearchEngine: "soundcloud",
+    defaultSearchEngine: "youtube", // Reverted to youtube
     send: (guildId, payload) => {
       const guild = client.guilds.cache.get(guildId);
       if (guild) guild.shard.send(payload);
     },
   },
   new Connectors.DiscordJS(client),
-  nodes
+  nodes,
 );
 
 client.kazagumo = kazagumo;
