@@ -10,16 +10,22 @@ module.exports = {
 
   async execute(interaction, client) {
     await interaction.deferReply();
-    const query = interaction.options.getString("query");
+    let query = interaction.options.getString("query");
     const voiceChannel = interaction.member.voice.channel;
 
     if (!voiceChannel) {
       return interaction.editReply("❌ Please join a voice channel first!");
     }
 
+    const isUrl = query.startsWith("http://") || query.startsWith("https://");
+
+    // Forcing strict native SoundCloud track identifier indexing
+    if (!isUrl) {
+      query = `scsearch:${query}`;
+    }
+
     let result;
     try {
-      // Direct Youtube Text Search Handler
       result = await client.kazagumo.search(query, { requester: interaction.user });
     } catch (e) {
       console.error(e);
