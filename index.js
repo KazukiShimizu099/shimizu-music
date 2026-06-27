@@ -26,23 +26,12 @@ const client = new Client({
 
 const nodes = [
   {
-    name: "Node-1",
-    url: "lava-v4.millohost.my.id:443",
-    auth: "https://discord.gg/mjS5J2K3ep",
-    secure: true,
-  },
-  {
-    name: "Node-2",
-    url: "lavalink.jirayu.net:13592",
-    auth: "youshallnotpass",
-    secure: false,
-  },
-  {
-    name: "Node-3",
-    url: "lavalinkv4.serenetia.com:443",
-    auth: "https://seretia.link/discord",
-    secure: true,
-  },
+    name: "Shimizu-Private-Node",
+    host: "private-lavalink-node-production.up.railway.app",
+    port: 443,                                             
+    password: "youshallnotpass",                           
+    secure: true                                             
+  }
 ];
 
 const kazagumo = new Kazagumo(
