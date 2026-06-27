@@ -23,8 +23,9 @@ module.exports = {
     const isUrl = query.startsWith("http://") || query.startsWith("https://");
 
     // Explicitly forcing Spotify/Web lookups to bypass standard IP blocks
-    if (!isUrl && !query.startsWith("spsearch:") && !query.startsWith("scsearch:") && !query.startsWith("ytsearch:")) {
-      query = `spsearch:${query}`;
+    // ... baki code same rahega, bas prefix change kar do
+    if (!isUrl) {
+      query = `ytsearch:${query}`; // Public node par ytsearch flawlessly kaam karega
     }
 
     let result;

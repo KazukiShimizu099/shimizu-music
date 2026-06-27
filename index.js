@@ -20,10 +20,11 @@ const client = new Client({
 
 const nodes = [
   {
-    name: "Shimizu-Private-Node",
-    url: "private-lavalink-node-production.up.railway.app:443", // Railway public endpoints always use 443
-    auth: "youshallnotpass",                                    // Shoukaku core key
-    secure: true                                               // Must be true for 443 (SSL)
+    name: "Shimizu-Public-Bypass",
+    host: "lavalink.blooket.gq", // Sahi aur open working node
+    port: 443,                   // SSL protocol port
+    password: "youshallnotpass",
+    secure: true,                // Secure connection required for port 443
   }
 ];
 
