@@ -29,7 +29,7 @@ const nodes = [
 
 const kazagumo = new Kazagumo(
   {
-    defaultSearchEngine: "youtube", // Reverted to youtube
+    defaultSearchEngine: "soundcloud", // Changed from youtube to soundcloud globally
     send: (guildId, payload) => {
       const guild = client.guilds.cache.get(guildId);
       if (guild) guild.shard.send(payload);

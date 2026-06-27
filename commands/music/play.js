@@ -24,20 +24,14 @@ module.exports = {
 
     let result;
     try {
-      // Kazagumo will now use the default engine from index.js securely
       result = await client.kazagumo.search(query, {
         requester: interaction.user,
+        engine: "soundcloud" // Enforces SoundCloud array rendering explicitly
       });
     } catch (e) {
       console.error(e);
       return interaction.editReply(
         "❌ An error occurred while searching for the song!",
-      );
-    }
-
-    if (!result || !result.tracks || !result.tracks.length) {
-      return interaction.editReply(
-        "❌ No results found! Try a different query.",
       );
     }
 
