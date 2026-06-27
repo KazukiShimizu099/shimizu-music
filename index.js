@@ -6,10 +6,11 @@ const client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildVoiceStates, // CRITICAL: This must be present for voice connection
+    GatewayIntentBits.GuildVoiceStates, // CRITICAL: Voice streaming ke liye zaroori hai
   ],
 });
 
+// Highly active public clusters for bypass
 const nodes = [
   {
     name: "Node-1",
@@ -31,13 +32,13 @@ client.kazagumo = new Kazagumo(
     send: (guildId, payload) => {
       const guild = client.guilds.cache.get(guildId);
       if (guild) guild.shard.send(payload);
-    } // FIXED: Removed extra trailing curly brace object tokens that caused the syntax throw
+    },
   },
   new Connectors.DiscordJS(client),
   nodes
 );
 
-// Global Debug Triggers to monitor exact track drops
+// Debug Loggers
 client.kazagumo.on("playerStart", (player, track) => {
   console.log(`[Shimizu Debug] Player started streaming track: ${track.title}`);
 });
@@ -46,23 +47,27 @@ client.kazagumo.on("playerError", (player, error) => {
   console.error("[Shimizu Debug] Kazagumo Core Player Error:", error);
 });
 
-client.kazagumo.on("playerResolveError", (player, track, error) => {
-  console.error("[Shimizu Debug] Track Resolution Failed:", error);
-});
-
 client.on("ready", () => {
   console.log(`✅ ${client.user.tag} is online and operational!`);
 });
 
-// Your standard interaction/message handling execution block remains below
+// Command Handler Execution Block
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
-  const command = client.commands.get(interaction.commandName);
+
+  // Custom command mapping wrapper check
+  const command = client.commands?.get(interaction.commandName);
   if (!command) return;
+
   try {
     await command.execute(interaction, client);
   } catch (error) {
-    console.error(error);
+    console.error("[Shimizu Handler Error]:", error);
+    if (interaction.deferred || interaction.replied) {
+      await interaction.editReply({ content: "❌ Error executing command!" });
+    } else {
+      await interaction.reply({ content: "❌ Error executing command!", ephemeral: true });
+    }
   }
 });
 
