@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, SlashCommandBuilder } = require("discord.js");
+const { Client, GatewayIntentBits } = require("discord.js");
 const { Kazagumo } = require("kazagumo");
 const ShoukakuConnector = require("shoukaku").Connectors.DiscordJS;
 
@@ -11,7 +11,6 @@ const client = new Client({
   ],
 });
 
-// Verified active public nodes
 const nodes = [
   {
     name: "Node-1",
@@ -39,44 +38,43 @@ client.kazagumo = new Kazagumo(
   nodes
 );
 
-// Global debug state tracks
-client.kazagumo.on("playerStart", (player, track) => {
-  console.log(`[Shimizu Debug] Streaming started: ${track.title}`);
-});
-client.kazagumo.on("playerError", (player, error) => {
-  console.error("[Shimizu Debug] Player Exception:", error);
-});
-
-// Force global alignment registers on ready state
 client.on("ready", async () => {
-  console.log(`✅ ${client.user.tag} is operational!`);
+  console.log(`✅ ${client.user.tag} is online and operational!`);
+
   try {
-    console.log("[Shimizu Register] Pushing absolute command schemes...");
-    await client.application.commands.set([
-      {
-        name: "play",
-        description: "Shimizu Music - Play a song",
-        options: [
-          {
-            name: "query",
-            type: 3, // String data input payload
-            description: "Enter song name / URL",
-            required: true
-          }
-        ]
-      },
-      {
-        name: "stop",
-        description: "Stop the music and clear streaming pipelines"
-      }
-    ]);
-    console.log("[Shimizu Register] Target schemes deployed successfully.");
+    console.log("[Shimizu Register] Purging global commands and forcing instant guild sync...");
+
+    // Clearing stale global context arrays
+    await client.application.commands.set([]);
+
+    // Loop across all active guilds to clear routing delays
+    client.guilds.cache.forEach(async (guild) => {
+      await guild.commands.set([
+        {
+          name: "play",
+          description: "Shimizu Music - Play a song",
+          options: [
+            {
+              name: "query",
+              type: 3, 
+              description: "Enter song name / URL",
+              required: true
+            }
+          ]
+        },
+        {
+          name: "stop",
+          description: "Stop the music and clear streaming pipelines"
+        }
+      ]);
+    });
+
+    console.log("[Shimizu Register] Absolute instant guild schemas deployed.");
   } catch (err) {
     console.error("[Shimizu Register Error]:", err);
   }
 });
 
-// Single point absolute runtime interaction handler
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
   console.log(`[Shimizu Intercept] Triggering: /${interaction.commandName}`);
