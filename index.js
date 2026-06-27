@@ -58,22 +58,29 @@ client.kazagumo.on("playerStart", (player, track) => {
 
 client.kazagumo.on("playerEmpty", player => {
   const channel = client.channels.cache.get(player.textId);
-  if (channel) channel.send("⏹️ Queue finished. Disconnecting from VC.");
-  player.destroy();
+  if (channel) channel.send("⏹️ Queue finished. Disconnecting from VC.").catch(() => {});
+  try {
+    if (player) player.destroy();
+  } catch (err) {}
 });
 
+// FIXED: Added strict Try-Catch to prevent 'Player is already destroyed' container crashes
 client.on("voiceStateUpdate", (oldState, newState) => {
   const player = client.kazagumo.players.get(oldState.guild.id);
   if (!player) return;
 
-  if (oldState.channelId && !newState.channelId && oldState.member.id === client.user.id) {
-    return player.destroy();
-  }
+  try {
+    if (oldState.channelId && !newState.channelId && oldState.member.id === client.user.id) {
+      return player.destroy();
+    }
 
-  if (oldState.channelId && oldState.channel.members.size === 1 && oldState.channel.members.has(client.user.id)) {
-    const channel = client.channels.cache.get(player.textId);
-    if (channel) channel.send("🚶 Everyone left. Disconnecting.");
-    player.destroy();
+    if (oldState.channelId && oldState.channel.members.size === 1 && oldState.channel.members.has(client.user.id)) {
+      const channel = client.channels.cache.get(player.textId);
+      if (channel) channel.send("🚶 Everyone left. Disconnecting.").catch(() => {});
+      return player.destroy();
+    }
+  } catch (error) {
+    // Suppress redundant destroy errors
   }
 });
 
@@ -106,7 +113,6 @@ client.on("interactionCreate", async interaction => {
   }
 });
 
-// Hybrid Prefix Engine
 client.on("messageCreate", async message => {
   if (message.author.bot || !message.content.startsWith(PREFIX)) return;
 
@@ -145,5 +151,9 @@ client.on("messageCreate", async message => {
     console.error(error);
   }
 });
+
+// CRITICAL: Global catchers to strictly prevent Railway container from crashing on background errors
+process.on("unhandledRejection", error => console.error("[System Fallback] Unhandled Rejection:", error));
+process.on("uncaughtException", error => console.error("[System Fallback] Uncaught Exception:", error));
 
 client.login(process.env.TOKEN);
