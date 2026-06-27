@@ -21,23 +21,22 @@ const client = new Client({
 const nodes = [
   {
     name: "Shimizu-Public-Bypass",
-    host: "lavalink.blooket.gq", // Sahi aur open working node
-    port: 443,                   // SSL protocol port
-    password: "youshallnotpass",
-    secure: true,                // Secure connection required for port 443
+    url: "lavalink.blooket.gq:443", // Shoukaku v4 requires 'url' combining host and port
+    auth: "youshallnotpass",        // Shoukaku v4 expects 'auth' instead of password
+    secure: true,
   }
 ];
 
 const kazagumo = new Kazagumo(
   {
-    defaultSearchEngine: "spotify", // Switched permanently to bypass YouTube range blocks
+    defaultSearchEngine: "youtube",
     send: (guildId, payload) => {
       const guild = client.guilds.cache.get(guildId);
       if (guild) guild.shard.send(payload);
     },
   },
   new Connectors.DiscordJS(client),
-  nodes,
+  nodes // Yeh upar wala optimized array hai
 );
 
 client.kazagumo = kazagumo;
