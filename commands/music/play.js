@@ -1,16 +1,11 @@
-const {
-  SlashCommandBuilder,
-} = require("discord.js");
+const { SlashCommandBuilder } = require("discord.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("play")
     .setDescription("Shimizu Music - Play a song")
     .addStringOption((opt) =>
-      opt
-        .setName("query")
-        .setDescription("Enter a song name or URL")
-        .setRequired(true),
+      opt.setName("query").setDescription("Enter a song name or URL").setRequired(true)
     ),
 
   async execute(interaction, client) {
@@ -22,31 +17,31 @@ module.exports = {
       return interaction.editReply("❌ Please join a voice channel first!");
     }
 
-    // Direct URL check
     const isUrl = query.startsWith("http://") || query.startsWith("https://");
 
-    // If it's a song name, explicitly force SoundCloud raw text index keyword
+    // Fallback search mechanisms array
+    let searchQueries = [];
     if (!isUrl) {
-      query = `scsearch:${query}`;
+      searchQueries.push(`scsearch:${query}`); // Track 1: SoundCloud
+      searchQueries.push(query);              // Track 2: Direct query array lookup
+    } else {
+      searchQueries.push(query);
     }
 
-    let result;
-    try {
-      // Passing raw query directly with default fallback handler
-      result = await client.kazagumo.search(query, {
-        requester: interaction.user
-      });
-    } catch (e) {
-      console.error("Search Execution Crash Logs:", e);
-      return interaction.editReply(
-        "❌ An error occurred while searching for the song!",
-      );
+    let result = null;
+    for (const searchQuery of searchQueries) {
+      try {
+        result = await client.kazagumo.search(searchQuery, { requester: interaction.user });
+        if (result && result.tracks && result.tracks.length > 0) {
+          break; // Match found, exit lookup chain
+        }
+      } catch (e) {
+        console.error(`Search failed for format [${searchQuery}]:`, e.message);
+      }
     }
 
     if (!result || !result.tracks || !result.tracks.length) {
-      return interaction.editReply(
-        "❌ No results found! Try a different query.",
-      );
+      return interaction.editReply("❌ No results found across all active search engines!");
     }
 
     let player;
@@ -69,9 +64,7 @@ module.exports = {
     if (!player.playing && !player.paused) await player.play();
 
     if (tracks.length > 1) {
-      await interaction.editReply(
-        `✅ Added **${tracks.length} songs** from playlist to queue!`,
-      );
+      await interaction.editReply(`✅ Added **${tracks.length} songs** to queue!`);
     } else {
       await interaction.editReply(`✅ Added to queue: **${tracks[0].title}**`);
     }
