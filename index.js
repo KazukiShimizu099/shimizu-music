@@ -58,18 +58,25 @@ client.on("ready", () => {
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
-  // Custom command mapping wrapper check
+  // Debugging line to see if Discord is sending the command to the bot
+  console.log(`[Shimizu Handler] Received slash command: /${interaction.commandName}`);
+
+  // Checking direct commands collection
   const command = client.commands?.get(interaction.commandName);
-  if (!command) return;
+
+  if (!command) {
+    console.log(`[Shimizu Handler] Command /${interaction.commandName} not found in client.commands collection.`);
+    return interaction.reply({ content: "❌ Command not synchronized globally.", ephemeral: true });
+  }
 
   try {
     await command.execute(interaction, client);
   } catch (error) {
-    console.error("[Shimizu Handler Error]:", error);
+    console.error("[Shimizu Handler Critical Error]:", error);
     if (interaction.deferred || interaction.replied) {
-      await interaction.editReply({ content: "❌ Error executing command!" });
+      await interaction.editReply({ content: "❌ Internal execution breakdown." });
     } else {
-      await interaction.reply({ content: "❌ Error executing command!", ephemeral: true });
+      await interaction.reply({ content: "❌ Internal execution breakdown.", ephemeral: true });
     }
   }
 });
