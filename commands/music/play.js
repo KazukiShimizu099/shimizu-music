@@ -11,18 +11,17 @@ module.exports = {
     ),
 
   async execute(interaction, client) {
-    if (!interaction.deferred && !interaction.replied) {
+    // Handle hybrid engine defer properly
+    if (typeof interaction.deferReply === "function") {
       await interaction.deferReply();
     }
 
     let query = interaction.options.getString("query");
-    if (!query) {
-      return interaction.editReply("❌ Provide a song name or URL.");
-    }
-
     const voiceChannel = interaction.member?.voice?.channel;
+
     if (!voiceChannel) {
-      return interaction.editReply("❌ You must join a voice channel first.");
+      const msg = "❌ You must be in a voice channel to play music.";
+      return interaction.editReply ? await interaction.editReply(msg) : await interaction.reply(msg);
     }
 
     let player = client.kazagumo.players.get(interaction.guildId);
@@ -36,30 +35,33 @@ module.exports = {
           volume: 80
         });
       } catch (error) {
-        console.error(error);
-        return interaction.editReply("❌ Failed to join voice channel.");
+        console.error("Player creation error:", error);
+        const msg = "❌ Failed to connect to voice channel.";
+        return interaction.editReply ? await interaction.editReply(msg) : await interaction.reply(msg);
       }
     }
 
+    // CRITICAL FIX: Bypass YouTube Block by forcing SoundCloud for raw text queries
     const isUrl = query.startsWith("http://") || query.startsWith("https://");
     if (!isUrl && !query.startsWith("ytsearch:") && !query.startsWith("scsearch:")) {
-      query = `ytsearch:${query}`;
+      query = `scsearch:${query}`; 
     }
 
     const result = await client.kazagumo.search(query, { requester: interaction.user });
 
     if (!result || !result.tracks.length) {
-      return interaction.editReply("❌ No results found. Try a different query.");
+      const msg = "❌ No results found. The public node might be rate-limited. Try passing a direct URL.";
+      return interaction.editReply ? await interaction.editReply(msg) : await interaction.reply(msg);
     }
 
     if (result.type === "PLAYLIST") {
-      for (const track of result.tracks) {
-        player.queue.add(track);
-      }
-      await interaction.editReply(`✅ Added playlist to queue: **${result.playlistName}** (${result.tracks.length} tracks)`);
+      for (const track of result.tracks) player.queue.add(track);
+      const msg = `✅ Added playlist to queue: **${result.playlistName}** (${result.tracks.length} tracks)`;
+      interaction.editReply ? await interaction.editReply(msg) : await interaction.reply(msg);
     } else {
       player.queue.add(result.tracks[0]);
-      await interaction.editReply(`✅ Added to queue: **${result.tracks[0].title}**`);
+      const msg = `✅ Added to queue: **${result.tracks[0].title}**`;
+      interaction.editReply ? await interaction.editReply(msg) : await interaction.reply(msg);
     }
 
     if (!player.playing && !player.paused && player.queue.length > 0) {
