@@ -1,19 +1,13 @@
 const { Client, GatewayIntentBits, Collection } = require("discord.js");
 const { Kazagumo } = require("kazagumo");
 const { Connectors } = require("shoukaku");
-const {
-  EmbedBuilder,
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-} = require("discord.js");
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
 require("dotenv").config();
 
 const MAINTENANCE_MODE = false;
-const MAINTENANCE_MESSAGE =
-  "🔧 Shimizu Music is currently under maintenance. Please wait a while and try again!";
+const MAINTENANCE_MESSAGE = "🔧 Shimizu Music is currently under maintenance. Please wait a while and try again!";
 
 const client = new Client({
   intents: [
@@ -38,7 +32,7 @@ const nodes = [
 
 const kazagumo = new Kazagumo(
   {
-    defaultSearchEngine: "youtube",
+    defaultSearchEngine: "soundcloud", 
     send: (guildId, payload) => {
       const guild = client.guilds.cache.get(guildId);
       if (guild) guild.shard.send(payload);
@@ -65,16 +59,12 @@ function msToTime(ms) {
 
 function buildProgressBar(position, total) {
   const barLength = 20;
-  const progress = Math.min(
-    Math.floor((position / total) * barLength),
-    barLength,
-  );
+  const progress = Math.min(Math.floor((position / total) * barLength), barLength);
   return "▓".repeat(progress) + "░".repeat(barLength - progress);
 }
 
 kazagumo.on("playerStart", (player, track) => {
   const channel = client.channels.cache.get(player.textId);
-
   client.user.setActivity(`🎵 ${track.title} - ${track.author}`, { type: 2 });
 
   client.rest
@@ -86,8 +76,7 @@ kazagumo.on("playerStart", (player, track) => {
   if (!channel) return;
 
   const duration = track.length;
-  const youtubeThumbnail =
-    track.uri && track.uri.includes("youtube")
+  const youtubeThumbnail = track.uri && track.uri.includes("youtube")
       ? `https://img.youtube.com/vi/${track.uri.split("v=")[1]?.split("&")[0]}/maxresdefault.jpg`
       : track.thumbnail || null;
 
@@ -124,56 +113,33 @@ kazagumo.on("playerStart", (player, track) => {
       .setTimestamp();
 
     const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId("pause_resume")
-        .setLabel("⏸ Pause")
-        .setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder()
-        .setCustomId("skip")
-        .setLabel("⏭ Skip")
-        .setStyle(ButtonStyle.Primary),
-      new ButtonBuilder()
-        .setCustomId("stop")
-        .setLabel("⏹ Stop")
-        .setStyle(ButtonStyle.Danger),
-      new ButtonBuilder()
-        .setCustomId("loop")
-        .setLabel("🔁 Loop")
-        .setStyle(ButtonStyle.Success),
-      new ButtonBuilder()
-        .setCustomId("shuffle")
-        .setLabel("🔀 Shuffle")
-        .setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder().setCustomId("pause_resume").setLabel("⏸ Pause").setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder().setCustomId("skip").setLabel("⏭ Skip").setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setCustomId("stop").setLabel("⏹ Stop").setStyle(ButtonStyle.Danger),
+      new ButtonBuilder().setCustomId("loop").setLabel("🔁 Loop").setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setCustomId("shuffle").setLabel("🔀 Shuffle").setStyle(ButtonStyle.Secondary),
     );
 
     return { embeds: [embed], components: [row] };
   }
 
-  channel
-    .send(buildEmbed(0))
-    .then((msg) => {
-      const interval = setInterval(async () => {
-        try {
-          const currentPlayer = client.kazagumo.players.get(player.guildId);
-          if (!currentPlayer || !currentPlayer.queue.current) {
-            clearInterval(interval);
-            return;
-          }
-          if (currentPlayer.queue.current.uri !== track.uri) {
-            clearInterval(interval);
-            return;
-          }
-          const pos = currentPlayer.shoukaku?.position || 0;
-          await msg.edit(buildEmbed(pos));
-          if (pos >= duration - 2000) clearInterval(interval);
-        } catch (e) {
+  channel.send(buildEmbed(0)).then((msg) => {
+    const interval = setInterval(async () => {
+      try {
+        const currentPlayer = client.kazagumo.players.get(player.guildId);
+        if (!currentPlayer || !currentPlayer.queue.current || currentPlayer.queue.current.uri !== track.uri) {
           clearInterval(interval);
+          return;
         }
-      }, 2000);
-
-      setTimeout(() => clearInterval(interval), 600000);
-    })
-    .catch(console.error);
+        const pos = currentPlayer.shoukaku?.position || 0;
+        await msg.edit(buildEmbed(pos));
+        if (pos >= duration - 2000) clearInterval(interval);
+      } catch (e) {
+        clearInterval(interval);
+      }
+    }, 2000);
+    setTimeout(() => clearInterval(interval), 600000);
+  }).catch(console.error);
 });
 
 kazagumo.on("playerEnd", (player) => {
@@ -181,39 +147,6 @@ kazagumo.on("playerEnd", (player) => {
 });
 
 kazagumo.on("playerEmpty", async (player) => {
-  // Autoplay - related song fetch karo
-  try {
-    const lastTrack = player.queue.current;
-    if (lastTrack && lastTrack.uri && lastTrack.uri.includes("youtube")) {
-      const videoId = lastTrack.uri.split("v=")[1]?.split("&")[0];
-      if (videoId) {
-        const result = await client.kazagumo.search(
-          `https://www.youtube.com/watch?v=${videoId}&list=RD${videoId}`,
-          { requester: client.user },
-        );
-        if (result && result.tracks.length > 1) {
-          const randomIndex =
-            Math.floor(Math.random() * Math.min(result.tracks.length - 1, 5)) +
-            1;
-          const randomTrack = result.tracks[randomIndex];
-          if (randomTrack) {
-            player.queue.add(randomTrack);
-            await player.play();
-            const channel = client.channels.cache.get(player.textId);
-            if (channel)
-              channel.send(
-                `🎵 Autoplay: **${randomTrack.title}** by **${randomTrack.author}**`,
-              );
-            return;
-          }
-        }
-      }
-    }
-  } catch (e) {
-    console.error("Autoplay error:", e.message);
-  }
-
-  // Autoplay fail hua toh normal disconnect
   client.user.setActivity("🎵 Shimizu Music | .help", { type: 2 });
   client.rest
     .put(`/channels/${player.voiceId}/voice-status`, { body: { status: "" } })
@@ -223,40 +156,28 @@ kazagumo.on("playerEmpty", async (player) => {
     const currentPlayer = client.kazagumo.players.get(player.guildId);
     if (currentPlayer && !currentPlayer.playing && !currentPlayer.paused) {
       const channel = client.channels.cache.get(player.textId);
-      if (channel)
-        channel.send("✅ Queue finished! Shimizu Music has disconnected.");
+      if (channel) channel.send("✅ Queue finished! Shimizu Music has disconnected.");
       currentPlayer.destroy();
     }
   }, 120000);
 });
 
-// Alone in VC - leave in 5s
 client.on("voiceStateUpdate", (oldState, newState) => {
-  const player = client.kazagumo.players.get(
-    oldState.guild.id || newState.guild.id,
-  );
+  const player = client.kazagumo.players.get(oldState.guild.id || newState.guild.id);
   if (!player) return;
 
   const voiceChannel = oldState.guild.channels.cache.get(player.voiceId);
   if (!voiceChannel) return;
 
-  // Sirf bot hai VC mein
   const members = voiceChannel.members.filter((m) => !m.user.bot);
   if (members.size === 0) {
     setTimeout(() => {
-      const currentPlayer = client.kazagumo.players.get(
-        oldState.guild.id || newState.guild.id,
-      );
+      const currentPlayer = client.kazagumo.players.get(oldState.guild.id || newState.guild.id);
       if (!currentPlayer) return;
-
       const vc = oldState.guild.channels.cache.get(currentPlayer.voiceId);
-      if (!vc) return;
-
-      const humans = vc.members.filter((m) => !m.user.bot);
-      if (humans.size === 0) {
+      if (vc && vc.members.filter((m) => !m.user.bot).size === 0) {
         const channel = client.channels.cache.get(currentPlayer.textId);
-        if (channel)
-          channel.send("👋 Everyone left! Shimizu Music has disconnected.");
+        if (channel) channel.send("👋 Everyone left! Shimizu Music has disconnected.");
         currentPlayer.destroy();
       }
     }, 5000);
@@ -264,25 +185,19 @@ client.on("voiceStateUpdate", (oldState, newState) => {
 });
 
 const commandsPath = path.join(__dirname, "commands/music");
-const commandFiles = fs
-  .readdirSync(commandsPath)
-  .filter((f) => f.endsWith(".js"));
-
-for (const file of commandFiles) {
-  const command = require(path.join(commandsPath, file));
-  if (command.data && command.execute) {
-    client.commands.set(command.data.name, command);
+if (fs.existsSync(commandsPath)) {
+  const commandFiles = fs.readdirSync(commandsPath).filter((f) => f.endsWith(".js"));
+  for (const file of commandFiles) {
+    const command = require(path.join(commandsPath, file));
+    if (command.data && command.execute) {
+      client.commands.set(command.data.name, command);
+    }
   }
 }
 
 client.on("interactionCreate", async (interaction) => {
-  if (MAINTENANCE_MODE) {
-    if (interaction.isChatInputCommand() || interaction.isButton()) {
-      return interaction.reply({
-        content: MAINTENANCE_MESSAGE,
-        ephemeral: true,
-      });
-    }
+  if (MAINTENANCE_MODE && (interaction.isChatInputCommand() || interaction.isButton())) {
+    return interaction.reply({ content: MAINTENANCE_MESSAGE, ephemeral: true });
   }
 
   if (interaction.isChatInputCommand()) {
@@ -292,27 +207,15 @@ client.on("interactionCreate", async (interaction) => {
       await command.execute(interaction, client);
     } catch (error) {
       console.error(error);
-      if (interaction.replied || interaction.deferred) {
-        await interaction.followUp({
-          content: "❌ An error occurred while executing the command!",
-          ephemeral: true,
-        });
-      } else {
-        await interaction.reply({
-          content: "❌ An error occurred while executing the command!",
-          ephemeral: true,
-        });
-      }
+      const resp = { content: "❌ An error occurred while executing the command!", ephemeral: true };
+      if (interaction.replied || interaction.deferred) await interaction.followUp(resp);
+      else await interaction.reply(resp);
     }
   }
 
   if (interaction.isButton()) {
     const player = client.kazagumo.players.get(interaction.guildId);
-    if (!player)
-      return interaction.reply({
-        content: "❌ No song is currently playing!",
-        ephemeral: true,
-      });
+    if (!player) return interaction.reply({ content: "❌ No song is currently playing!", ephemeral: true });
 
     switch (interaction.customId) {
       case "pause_resume":
@@ -337,16 +240,10 @@ client.on("interactionCreate", async (interaction) => {
       case "loop":
         if (player.loop === "none") {
           player.setLoop("track");
-          await interaction.reply({
-            content: "🔁 Loop: Track ON",
-            ephemeral: true,
-          });
+          await interaction.reply({ content: "🔁 Loop: Track ON", ephemeral: true });
         } else if (player.loop === "track") {
           player.setLoop("queue");
-          await interaction.reply({
-            content: "🔁 Loop: Queue ON",
-            ephemeral: true,
-          });
+          await interaction.reply({ content: "🔁 Loop: Queue ON", ephemeral: true });
         } else {
           player.setLoop("none");
           await interaction.reply({ content: "🔁 Loop: OFF", ephemeral: true });
@@ -354,10 +251,7 @@ client.on("interactionCreate", async (interaction) => {
         break;
       case "shuffle":
         player.queue.shuffle();
-        await interaction.reply({
-          content: "🔀 Queue shuffled!",
-          ephemeral: true,
-        });
+        await interaction.reply({ content: "🔀 Queue shuffled!", ephemeral: true });
         break;
     }
   }
@@ -367,14 +261,6 @@ client.once("ready", () => {
   console.log(`✅ ${client.user.tag} is online! - Shimizu Music`);
   console.log(`📊 Servers: ${client.guilds.cache.size}`);
   client.user.setActivity("🎵 Shimizu Music", { type: 2 });
-
-  // VC Time tracker
-  setInterval(() => {
-    const activePlayers = client.kazagumo.players.size;
-    if (activePlayers > 0) {
-      client.vcTime += activePlayers;
-    }
-  }, 1000);
 });
 
 const CONFIG_FILE = path.join(__dirname, "serverconfig.json");
@@ -398,22 +284,10 @@ client.on("messageCreate", async (message) => {
   const commandName = args.shift().toLowerCase();
 
   const aliases = {
-    p: "play",
-    s: "skip",
-    st: "stop",
-    pa: "pause",
-    r: "resume",
-    q: "queue",
-    l: "loop",
-    v: "volume",
-    np: "nowplaying",
-    f: "filter",
-    h: "help",
-    help: "help",
-    ly: "lyrics",
-    lyrics: "lyrics",
-    setprefix: "setprefix",
-    stats: "stats",
+    p: "play", s: "skip", st: "stop", pa: "pause", r: "resume",
+    q: "queue", l: "loop", v: "volume", np: "nowplaying",
+    f: "filter", h: "help", help: "help", ly: "lyrics",
+    lyrics: "lyrics", setprefix: "setprefix", stats: "stats"
   };
 
   const resolvedName = aliases[commandName] || commandName;
@@ -431,41 +305,17 @@ client.on("messageCreate", async (message) => {
     replied: false,
     deferred: false,
     options: {
-      getString: (name) => {
-        if (name === "query") return args.join(" ");
-        if (name === "prefix") return args[0] || null;
-        if (name === "name") return args[0] || null;
-        if (name === "type") return args[0] || null;
-        if (name === "amount") return args[0] || null;
-        if (name === "mode") return args[0] || null;
-        return args[0] || null;
-      },
-      getInteger: (name) => {
-        if (name === "amount") return parseInt(args[0]) || null;
-        if (name === "index") return parseInt(args[0]) || null;
-        return null;
-      },
+      getString: (name) => args.join(" "),
+      getInteger: (name) => parseInt(args[0]) || null,
       getSubcommand: () => null,
     },
-    deferReply: async () => {
-      fakeInteraction.deferred = true;
-    },
-    editReply: async (data) => {
-      return message.channel.send(data);
-    },
+    deferReply: async () => { fakeInteraction.deferred = true; },
+    editReply: async (data) => message.channel.send(data),
     reply: async (data) => {
       fakeInteraction.replied = true;
-      if (typeof data === "string") return message.channel.send(data);
-      if (data.content) return message.channel.send(data.content);
-      if (data.embeds) return message.channel.send({ embeds: data.embeds });
-      return message.channel.send(data);
+      return message.channel.send(typeof data === "string" ? data : (data.content || { embeds: data.embeds }));
     },
-    followUp: async (data) => {
-      if (typeof data === "string") return message.channel.send(data);
-      if (data.content) return message.channel.send(data.content);
-      if (data.embeds) return message.channel.send({ embeds: data.embeds });
-      return message.channel.send(data);
-    },
+    followUp: async (data) => message.channel.send(typeof data === "string" ? data : (data.content || { embeds: data.embeds })),
     isChatInputCommand: () => false,
     isButton: () => false,
   };
@@ -479,8 +329,6 @@ client.on("messageCreate", async (message) => {
 });
 
 const http = require("http");
-http
-  .createServer((req, res) => res.end("Shimizu Music is alive!"))
-  .listen(3000);
+http.createServer((req, res) => res.end("Shimizu Music is alive!")).listen(3000);
 
 client.login(process.env.DISCORD_TOKEN);
