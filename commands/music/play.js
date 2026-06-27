@@ -15,23 +15,37 @@ module.exports = {
 
   async execute(interaction, client) {
     await interaction.deferReply();
-    const query = interaction.options.getString("query");
+    let query = interaction.options.getString("query");
     const voiceChannel = interaction.member.voice.channel;
 
     if (!voiceChannel) {
       return interaction.editReply("❌ Please join a voice channel first!");
     }
 
+    // Direct URL check
+    const isUrl = query.startsWith("http://") || query.startsWith("https://");
+
+    // If it's a song name, explicitly force SoundCloud raw text index keyword
+    if (!isUrl) {
+      query = `scsearch:${query}`;
+    }
+
     let result;
     try {
+      // Passing raw query directly with default fallback handler
       result = await client.kazagumo.search(query, {
-        requester: interaction.user,
-        engine: "soundcloud" // Enforces SoundCloud array rendering explicitly
+        requester: interaction.user
       });
     } catch (e) {
-      console.error(e);
+      console.error("Search Execution Crash Logs:", e);
       return interaction.editReply(
         "❌ An error occurred while searching for the song!",
+      );
+    }
+
+    if (!result || !result.tracks || !result.tracks.length) {
+      return interaction.editReply(
+        "❌ No results found! Try a different query.",
       );
     }
 
@@ -49,8 +63,7 @@ module.exports = {
       return interaction.editReply("❌ Failed to join the voice channel!");
     }
 
-    const tracks =
-      result.type === "PLAYLIST" ? result.tracks : [result.tracks[0]];
+    const tracks = result.type === "PLAYLIST" ? result.tracks : [result.tracks[0]];
     for (const track of tracks) player.queue.add(track);
 
     if (!player.playing && !player.paused) await player.play();
