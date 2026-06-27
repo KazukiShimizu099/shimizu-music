@@ -22,24 +22,21 @@ const nodes = [
   {
     name: "Shimizu-Private-Node",
     url: "private-lavalink-node-production.up.railway.app:443",
-    host: "private-lavalink-node-production.up.railway.app",
-    port: 443,
     auth: "youshallnotpass",
-    password: "youshallnotpass",
     secure: true
   }
 ];
 
 const kazagumo = new Kazagumo(
   {
-    defaultSearchEngine: "soundcloud", 
+    defaultSearchEngine: "soundcloud",
     send: (guildId, payload) => {
       const guild = client.guilds.cache.get(guildId);
       if (guild) guild.shard.send(payload);
     },
   },
   new Connectors.DiscordJS(client),
-  nodes,
+  nodes
 );
 
 client.kazagumo = kazagumo;
