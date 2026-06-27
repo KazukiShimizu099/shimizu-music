@@ -1,6 +1,5 @@
 const { Client, GatewayIntentBits } = require("discord.js");
 const { Kazagumo, Connectors } = require("kazagumo");
-const Spotify = require("kazagumo-spotify"); // If you are using spotify plugin, else keep default
 
 const client = new Client({
   intents: [
