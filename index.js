@@ -29,7 +29,7 @@ const nodes = [
 
 const kazagumo = new Kazagumo(
   {
-    defaultSearchEngine: "soundcloud", // Switched permanently to bypass YouTube range blocks
+    defaultSearchEngine: "spotify", // Switched permanently to bypass YouTube range blocks
     send: (guildId, payload) => {
       const guild = client.guilds.cache.get(guildId);
       if (guild) guild.shard.send(payload);

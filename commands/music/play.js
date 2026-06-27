@@ -9,7 +9,10 @@ module.exports = {
     ),
 
   async execute(interaction, client) {
-    await interaction.deferReply();
+    if (!interaction.deferred) {
+      await interaction.deferReply();
+    }
+
     let query = interaction.options.getString("query");
     const voiceChannel = interaction.member.voice.channel;
 
@@ -19,9 +22,9 @@ module.exports = {
 
     const isUrl = query.startsWith("http://") || query.startsWith("https://");
 
-    // Fallback to strict native routing if not a direct URL
-    if (!isUrl && !query.startsWith("scsearch:") && !query.startsWith("ytsearch:")) {
-      query = `scsearch:${query}`;
+    // Explicitly forcing Spotify/Web lookups to bypass standard IP blocks
+    if (!isUrl && !query.startsWith("spsearch:") && !query.startsWith("scsearch:") && !query.startsWith("ytsearch:")) {
+      query = `spsearch:${query}`;
     }
 
     let result;
@@ -34,9 +37,9 @@ module.exports = {
       return interaction.editReply("❌ An error occurred while searching for the song!");
     }
 
-    // Critical validation check to block KazagumoError crashes
+    // Direct return check to prevent cascading command execution errors
     if (!result || !result.tracks || result.tracks.length === 0) {
-      return interaction.editReply("❌ No tracks found! Lavalink couldn't fetch metadata for this engine.");
+      return interaction.editReply("❌ No tracks found! Lavalink source engines are restricted on this IP host.");
     }
 
     let player;
@@ -53,22 +56,19 @@ module.exports = {
       return interaction.editReply("❌ Failed to join the voice channel!");
     }
 
-    // Safely parse and queue the tracks
     if (result.type === "PLAYLIST") {
       for (const track of result.tracks) player.queue.add(track);
-      await interaction.editReply(`✅ Added playlist **${result.playlistName}** (${result.tracks.length} songs) to queue!`);
+      return interaction.editReply(`✅ Added playlist **${result.playlistName}** (${result.tracks.length} songs) to queue!`);
     } else {
       player.queue.add(result.tracks[0]);
       await interaction.editReply(`✅ Added to queue: **${result.tracks[0].title}**`);
     }
 
-    // Run player execution only if tracks exist and player is idle
     if (!player.playing && !player.paused && player.queue.length > 0) {
       try {
         await player.play();
       } catch (playError) {
-        console.error("[Shimizu Debug] Kazagumo Play Error:", playError.message);
-        return interaction.channel.send("❌ Internal Lavalink error encountered during stream playback initiation.");
+        console.error("[Shimizu Debug] Play Exception:", playError.message);
       }
     }
   },
