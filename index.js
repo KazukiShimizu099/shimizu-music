@@ -32,7 +32,7 @@ client.kazagumo = new Kazagumo(
     send: (guildId, payload) => {
       const guild = client.guilds.cache.get(guildId);
       if (guild) guild.shard.send(payload);
-    };
+    } // FIXED: Removed extra trailing curly brace object tokens that caused the syntax throw
   },
   new Connectors.DiscordJS(client),
   nodes
