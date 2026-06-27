@@ -29,7 +29,7 @@ const nodes = [
 
 const kazagumo = new Kazagumo(
   {
-    defaultSearchEngine: "soundcloud",
+    defaultSearchEngine: "spotify", // Switched to Spotify for precise name matching
     send: (guildId, payload) => {
       const guild = client.guilds.cache.get(guildId);
       if (guild) guild.shard.send(payload);
@@ -38,12 +38,9 @@ const kazagumo = new Kazagumo(
   new Connectors.DiscordJS(client),
   nodes,
   {
-    // Shoukaku-specific configurations to force connection stability
     moveOnDisconnect: true,
     resume: true,
     resumeTimeout: 60,
-    reconnectTries: 5,
-    restTimeout: 15000
   }
 );
 

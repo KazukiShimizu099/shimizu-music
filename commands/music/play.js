@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, MessageFlags } = require("discord.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -19,11 +19,11 @@ module.exports = {
 
     const isUrl = query.startsWith("http://") || query.startsWith("https://");
 
-    // Fallback search mechanisms array
     let searchQueries = [];
     if (!isUrl) {
-      searchQueries.push(`scsearch:${query}`); // Track 1: SoundCloud
-      searchQueries.push(query);              // Track 2: Direct query array lookup
+      // Precise cross-engine lookups
+      searchQueries.push(`spsearch:${query}`); // Spotify Search (High Accuracy)
+      searchQueries.push(`scsearch:${query}`); // SoundCloud Fallback
     } else {
       searchQueries.push(query);
     }
@@ -33,15 +33,15 @@ module.exports = {
       try {
         result = await client.kazagumo.search(searchQuery, { requester: interaction.user });
         if (result && result.tracks && result.tracks.length > 0) {
-          break; // Match found, exit lookup chain
+          break; 
         }
       } catch (e) {
-        console.error(`Search failed for format [${searchQuery}]:`, e.message);
+        console.error(`Search failed for: ${searchQuery}`, e.message);
       }
     }
 
     if (!result || !result.tracks || !result.tracks.length) {
-      return interaction.editReply("❌ No results found across all active search engines!");
+      return interaction.editReply("❌ No results found across active networks! Try a different name.");
     }
 
     let player;
@@ -50,8 +50,8 @@ module.exports = {
         guildId: interaction.guildId,
         textId: interaction.channelId,
         voiceId: voiceChannel.id,
-        deaf: true,       // Self-deaf true taaki Discord bot ko stream process karne de
-        volume: 80,       // Default safe stream volume 80% par set karo for initialization
+        deaf: true,
+        volume: 80,
       });
     } catch (e) {
       console.error(e);
