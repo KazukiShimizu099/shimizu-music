@@ -27,27 +27,21 @@ const client = new Client({
 const nodes = [
   {
     name: "Node-1",
-    url: "lavalink.jirayu.net:443",
-    auth: "youshallnotpass",
+    url: "lava-v4.millohost.my.id:443",
+    auth: "https://discord.gg/mjS5J2K3ep",
     secure: true,
   },
   {
     name: "Node-2",
-    url: "lavalink-v4.triniumhost.com:443",
-    auth: "free",
-    secure: true,
+    url: "lavalink.jirayu.net:13592",
+    auth: "youshallnotpass",
+    secure: false,
   },
   {
     name: "Node-3",
-    url: "sg1-nodelink.nyxbot.appt:3000",
-    auth: "nyxbot.app/support",
-    secure: false,
-  },
-  {
-    name: "Node-4",
-    url: "lavalink.triniumhost.com:4333",
-    auth: "free",
-    secure: false,
+    url: "lavalinkv4.serenetia.com:443",
+    auth: "https://seretia.link/discord",
+    secure: true,
   },
 ];
 
