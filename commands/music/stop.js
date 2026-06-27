@@ -1,34 +1,28 @@
-const { SlashCommandBuilder } = require("discord.js");
-
 module.exports = {
-  data: new SlashCommandBuilder()
-    .setName("stop")
-    .setDescription("Shimizu Music - Stop the music and disconnect the bot"),
+  name: "stop",
+  description: "Stop the music and leave the voice channel",
+  async execute(message, args, client) {
+    // Check if the interaction/message context has guildId securely
+    const guildId = message.guild?.id || message.guildId;
+    if (!guildId) return;
 
-  async execute(interaction, client) {
-    const guildQueue = client.queue.get(interaction.guildId);
+    // Direct access via safe optional chaining or Kazagumo player cache map
+    const player = client.kazagumo?.players?.get(guildId) || client.kazagumo?.player?.get(guildId);
 
-    if (!guildQueue)
-      return interaction.reply({
-        content: "❌ No song is currently playing!",
-        ephemeral: true,
-      });
-    if (!interaction.member.voice.channel)
-      return interaction.reply({
-        content: "❌ Please join a voice channel first!",
-        ephemeral: true,
-      });
+    if (!player) {
+      if (typeof message.reply === "function") {
+        return message.reply("❌ There is no music playing in this server!");
+      }
+      return;
+    }
 
-    guildQueue.tracks = [];
-    guildQueue.player.stopTrack();
     try {
-      guildQueue.player.connection.disconnect();
-    } catch (e) {}
-    client.queue.delete(interaction.guildId);
-
-    await interaction.reply({
-      content: "⏹️ Music has been stopped! Shimizu Music has disconnected.",
-      ephemeral: false,
-    });
+      player.destroy();
+      if (typeof message.reply === "function") {
+        return message.reply("⏹️ Stopped the player and left the voice channel.");
+      }
+    } catch (error) {
+      console.error("[Shimizu Debug] Stop command error:", error);
+    }
   },
 };
