@@ -27,8 +27,10 @@ const client = new Client({
 const nodes = [
   {
     name: "Shimizu-Private-Node",
+    url: "private-lavalink-node-production.up.railway.app:443",
     host: "private-lavalink-node-production.up.railway.app",
     port: 443,
+    auth: "youshallnotpass",
     password: "youshallnotpass",
     secure: true
   }
