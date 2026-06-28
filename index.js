@@ -46,7 +46,6 @@ function buildProgressBar(position, total) {
   return "▓".repeat(progress) + "░".repeat(barLength - progress);
 }
 
-// RESTORED: Player Panel & Embed
 client.kazagumo.on("playerStart", (player, track) => {
   const channel = client.channels.cache.get(player.textId);
   client.user.setActivity(`🎵 ${track.title}`, { type: 2 });
@@ -55,14 +54,13 @@ client.kazagumo.on("playerStart", (player, track) => {
   try {
     client.rest.put(`/channels/${player.voiceId}/voice-status`, {
       body: { status: `🎵 ${track.title}`.substring(0, 499) }
-    }).catch((e) => console.error("[VC Status] Failed to set status:", e.message));
+    }).catch(() => {});
   } catch (err) {}
 
   if (!channel) return;
-  const duration = track.length;
-
-  if (!channel) return;
-  const duration = track.length;
+  
+  // Declared ONLY ONCE
+  const duration = track.length; 
   const youtubeThumbnail = track.uri && track.uri.includes("youtube")
     ? `https://img.youtube.com/vi/${track.uri.split("v=")[1]?.split("&")[0]}/maxresdefault.jpg`
     : track.thumbnail || null;
@@ -118,6 +116,11 @@ client.kazagumo.on("playerStart", (player, track) => {
 
 // RESTORED: Autoplay System
 client.kazagumo.on("playerEmpty", async (player) => {
+  try {
+    client.rest.put(`/channels/${player.voiceId}/voice-status`, {
+      body: { status: "" }
+    }).catch(() => {});
+  } catch (err) {}
   try {
     const lastTrack = player.queue.current;
     if (lastTrack && lastTrack.uri && lastTrack.uri.includes("youtube")) {
