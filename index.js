@@ -221,25 +221,63 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 // Fake Interaction for Prefix Commands
+// Fake Interaction for Prefix Commands (REPLACE YOUR EXISTING messageCreate BLOCK WITH THIS)
 client.on("messageCreate", async (message) => {
   if (message.author.bot || !message.content.startsWith(".")) return;
+  
   const args = message.content.slice(1).trim().split(/ +/);
   const commandName = args.shift().toLowerCase();
-  const aliases = { p: "play", s: "skip", st: "stop", pa: "pause", r: "resume", q: "queue", l: "loop", v: "volume" };
+  
+  // STRICT FIX: Restored all missing aliases (ly, np, f, stats, etc.)
+  const aliases = { 
+    p: "play", s: "skip", st: "stop", pa: "pause", r: "resume", 
+    q: "queue", l: "loop", v: "volume", ly: "lyrics", lyrics: "lyrics",
+    np: "nowplaying", f: "filter", h: "help", stats: "stats" 
+  };
+  
   const resolvedName = aliases[commandName] || commandName;
   const command = client.commands.get(resolvedName);
+  
   if (!command) return;
 
+  // STRICT FIX: Optimized payload handling so live lyrics can fetch the message object and edit it
   const fakeInteraction = {
-    guildId: message.guild.id, channelId: message.channel.id, channel: message.channel, member: message.member, user: message.author, guild: message.guild, deferred: false, replied: false,
-    options: { getString: (name) => name === "query" ? args.join(" ") : args[0] || null, getInteger: () => parseInt(args[0]) || null },
+    guildId: message.guild.id, 
+    channelId: message.channel.id, 
+    channel: message.channel, 
+    member: message.member, 
+    user: message.author, 
+    guild: message.guild, 
+    deferred: false, 
+    replied: false,
+    options: { 
+      getString: (name) => name === "query" ? args.join(" ") : args[0] || null, 
+      getInteger: () => parseInt(args[0]) || null 
+    },
     deferReply: async () => { fakeInteraction.deferred = true; },
-    reply: async (data) => { fakeInteraction.replied = true; return message.channel.send(typeof data === "string" ? data : data.content || { embeds: data.embeds }); },
-    editReply: async (data) => message.channel.send(typeof data === "string" ? data : data.content || { embeds: data.embeds }),
-    followUp: async (data) => message.channel.send(typeof data === "string" ? data : data.content || { embeds: data.embeds }),
-    isChatInputCommand: () => false, isButton: () => false,
+    reply: async (data) => { 
+      fakeInteraction.replied = true; 
+      const payload = typeof data === "string" ? { content: data } : data;
+      return message.channel.send(payload); 
+    },
+    editReply: async (data) => { 
+      const payload = typeof data === "string" ? { content: data } : data;
+      return message.channel.send(payload); 
+    },
+    followUp: async (data) => { 
+      const payload = typeof data === "string" ? { content: data } : data;
+      return message.channel.send(payload); 
+    },
+    isChatInputCommand: () => false, 
+    isButton: () => false,
   };
-  try { await command.execute(fakeInteraction, client); } catch (e) { console.error(e); }
+
+  try { 
+    await command.execute(fakeInteraction, client); 
+  } catch (e) { 
+    console.error("Hybrid Command Execution Error:", e); 
+    message.channel.send("❌ An error occurred while executing the command.");
+  }
 });
 
 process.on("unhandledRejection", error => console.error("[System] Unhandled Rejection:", error.message));
