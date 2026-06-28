@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require("discord.js");
+const ytSearch = require("yt-search");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -40,29 +41,27 @@ module.exports = {
     }
 
     const isUrl = query.startsWith("http://") || query.startsWith("https://");
-    let result;
+    let finalQuery = query;
 
-    if (isUrl) {
-      result = await client.kazagumo.search(query, { requester: interaction.user });
-    } else {
-      // 1. Primary: YouTube Search
-      result = await client.kazagumo.search(`ytsearch:${query}`, { requester: interaction.user });
-      
-      // 2. Fallback: YouTube Music
-      if (!result || !result.tracks.length) {
-        result = await client.kazagumo.search(`ytmsearch:${query}`, { requester: interaction.user });
+    // Strict YouTube Bypass: Finds exact URL before sending to Lavalink
+    if (!isUrl) {
+      try {
+        const searchResult = await ytSearch(query);
+        if (searchResult && searchResult.videos.length > 0) {
+          finalQuery = searchResult.videos[0].url;
+        } else {
+          return interaction.editReply("❌ No exact match found on YouTube.");
+        }
+      } catch (err) {
+        console.error("Local search failed:", err);
+        return interaction.editReply("❌ YouTube search failed. Please provide a direct URL.");
       }
-
-      // 3. Fallback: Spotify Search (Bypasses YouTube IP Blocks if node supports LavaSrc)
-      if (!result || !result.tracks.length) {
-        result = await client.kazagumo.search(`spsearch:${query}`, { requester: interaction.user });
-      }
-      
-      // STRICT FIX: Removed scsearch (SoundCloud) to prevent garbage podcast results.
     }
 
+    const result = await client.kazagumo.search(finalQuery, { requester: interaction.user });
+
     if (!result || !result.tracks.length) {
-      return interaction.editReply("❌ YouTube is currently rate-limiting the public nodes. Please paste a direct YouTube or Spotify URL link instead of a song name.");
+      return interaction.editReply("❌ Lavalink failed to process the track. Node is rate-limited.");
     }
 
     if (result.type === "PLAYLIST") {
