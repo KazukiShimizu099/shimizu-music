@@ -51,6 +51,16 @@ client.kazagumo.on("playerStart", (player, track) => {
   const channel = client.channels.cache.get(player.textId);
   client.user.setActivity(`🎵 ${track.title}`, { type: 2 });
 
+  // STRICT FIX: Live Voice Channel Status Update via Discord REST API
+  try {
+    client.rest.put(`/channels/${player.voiceId}/voice-status`, {
+      body: { status: `🎵 ${track.title}`.substring(0, 499) }
+    }).catch((e) => console.error("[VC Status] Failed to set status:", e.message));
+  } catch (err) {}
+
+  if (!channel) return;
+  const duration = track.length;
+
   if (!channel) return;
   const duration = track.length;
   const youtubeThumbnail = track.uri && track.uri.includes("youtube")
