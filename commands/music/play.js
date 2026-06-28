@@ -54,14 +54,14 @@ module.exports = {
         }
       } catch (err) {
         console.error("Local search failed:", err);
-        return interaction.editReply("❌ YouTube search failed. Please provide a direct URL.");
+        return interaction.editReply("❌ Shimizu search failed. Please provide a direct URL.");
       }
     }
 
     const result = await client.kazagumo.search(finalQuery, { requester: interaction.user });
 
     if (!result || !result.tracks.length) {
-      return interaction.editReply("❌ Lavalink failed to process the track. Node is rate-limited.");
+      return interaction.editReply("❌ Shimizu Servers failed to process the track. Node is rate-limited - Sale ka Gareeb server.");
     }
 
     if (result.type === "PLAYLIST") {
