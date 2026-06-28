@@ -15,9 +15,9 @@ const client = new Client({
 });
 
 const nodes = [
-  { name: "SHimizu Private Node", url: "shimizu-privatenode-production.up.railway.app:443", auth: "shimizusecret", secure: false },
-  { name: "Node2", url: "", auth: "https://dsc.gg/ajidevserver", secure: true },
-  { name: "Node3", url: "", auth: "https://dsc.gg/ajidevserver", secure: true }
+  { name: "Node1", url: "lavalink.jirayu.net:13592", auth: "youshallnotpass", secure: false },
+  { name: "Node2", url: "lavalinkv4.serenetia.com:443", auth: "https://dsc.gg/ajidevserver", secure: true },
+  { name: "Node3", url: "lavalink.serenetia.com:443", auth: "https://dsc.gg/ajidevserver", secure: true }
 ];
 
 client.kazagumo = new Kazagumo({
