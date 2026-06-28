@@ -42,28 +42,27 @@ module.exports = {
     const isUrl = query.startsWith("http://") || query.startsWith("https://");
     let result;
 
-    // Advanced Fallback Search System
     if (isUrl) {
       result = await client.kazagumo.search(query, { requester: interaction.user });
     } else {
-      // 1. Try Default YouTube Search
+      // 1. Primary: YouTube Search
       result = await client.kazagumo.search(`ytsearch:${query}`, { requester: interaction.user });
       
-      // 2. Fallback to YouTube Music if blocked
+      // 2. Fallback: YouTube Music
       if (!result || !result.tracks.length) {
-        console.log("[Fallback] YouTube failed, trying YouTube Music...");
         result = await client.kazagumo.search(`ytmsearch:${query}`, { requester: interaction.user });
       }
-      
-      // 3. Fallback to SoundCloud if both YouTube engines are blocked
+
+      // 3. Fallback: Spotify Search (Bypasses YouTube IP Blocks if node supports LavaSrc)
       if (!result || !result.tracks.length) {
-        console.log("[Fallback] YouTube Music failed, trying SoundCloud...");
-        result = await client.kazagumo.search(`scsearch:${query}`, { requester: interaction.user });
+        result = await client.kazagumo.search(`spsearch:${query}`, { requester: interaction.user });
       }
+      
+      // STRICT FIX: Removed scsearch (SoundCloud) to prevent garbage podcast results.
     }
 
     if (!result || !result.tracks.length) {
-      return interaction.editReply("❌ No results found. All search engines are currently rate-limited. Try using a direct URL.");
+      return interaction.editReply("❌ YouTube is currently rate-limiting the public nodes. Please paste a direct YouTube or Spotify URL link instead of a song name.");
     }
 
     if (result.type === "PLAYLIST") {
