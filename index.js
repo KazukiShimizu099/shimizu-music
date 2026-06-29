@@ -4,6 +4,7 @@ const { Kazagumo } = require("kazagumo");
 const { Connectors } = require("shoukaku");
 const fs = require("fs");
 const path = require("path");
+const KazagumoSpotify = require("kazagumo-spotify");
 
 const client = new Client({
   intents: [
@@ -21,7 +22,16 @@ const nodes = [
 ];
 
 client.kazagumo = new Kazagumo({
-  defaultSearchEngine: "youtube",
+  defaultSearchEngine: "spotify", // Youtube se spotify change kiya
+  plugins: [
+    new KazagumoSpotify({
+      clientId: process.env.SPOTIFY_CLIENT_ID,
+      clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+      playlistPageLimit: 1, // Performance ke liye 1 page limit (100 tracks)
+      albumPageLimit: 1,
+      searchMarket: 'IN',
+    })
+  ],
   send: (guildId, payload) => {
     const guild = client.guilds.cache.get(guildId);
     if (guild) guild.shard.send(payload);
