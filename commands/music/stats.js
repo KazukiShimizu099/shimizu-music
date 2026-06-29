@@ -92,7 +92,7 @@ module.exports = {
           inline: true,
         },
         {
-          name: "🎵 Lavalink Nodes",
+          name: "🎵 Shimizu Private Nodes",
           value: nodesStatus,
           inline: false,
         },
