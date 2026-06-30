@@ -1,0 +1,24 @@
+{
+  "name": "nodejs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/voice": "^0.19.2",
+    "@types/node": "^22.13.11",
+    "discord.js": "^14.26.2",
+    "dotenv": "^17.4.2",
+    "genius-lyrics": "^4.4.7",
+    "kazagumo": "^3.4.3",
+    "kazagumo-spotify": "^1.1.5",
+    "node-fetch": "^2.7.0",
+    "shoukaku": "^4.3.0",
+    "sodium-native": "^5.1.0"
+  }
+}
